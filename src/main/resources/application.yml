@@ -1,0 +1,44 @@
+# 服务基础配置
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# Spring 数据源配置
+spring:
+  main:
+    allow-circular-references: true
+  application:
+    name: platform-x-admin
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/platform_x_admin?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+  # JPA/Hibernate 配置（可选）
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+# MyBatis 配置
+mybatis:
+  type-aliases-package: com.bytescheduler.platformxadmin.modules.system.entity
+  mapper-locations: classpath:mapper/**/*.xml  # XML 文件路径
+  configuration:
+    map-underscore-to-camel-case: true        # 开启驼峰命名转换
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 控制台打印 SQL
+
+# JWT 配置（需与 JwtTokenUtil 中的字段对应）
+jwt:
+  secret: "your-secret-key-here"  # 加密密钥（建议使用环境变量）
+  expiration: 3600                # 过期时间（秒）
+
+# 日志配置（可选）
+logging:
+  level:
+    root: info
+    com.bytescheduler.platform: debug  # 项目包日志级别
+    org.springframework.security: DEBUG
+  file:
+    name: logs/app.log

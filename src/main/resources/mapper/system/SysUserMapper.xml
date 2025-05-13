@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytescheduler.platformxadmin.modules.system.mapper.SysUserMapper">
+    <select id="selectByUsername" resultType="SysUser">
+        SELECT *
+        FROM sys_user
+        WHERE username = #{username}
+          AND is_deleted = 0
+    </select>
+
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO sys_user
+            (username, password, nickname, email, phone, status)
+        VALUES (#{username}, #{password}, #{nickname}, #{email}, #{phone}, 0)
+    </insert>
+
+    <update id="updateLoginInfo">
+        UPDATE sys_user
+        SET last_login_ip   = #{loginIp},
+            last_login_time = #{loginTime}
+        WHERE user_id = #{userId}
+    </update>
+</mapper>
