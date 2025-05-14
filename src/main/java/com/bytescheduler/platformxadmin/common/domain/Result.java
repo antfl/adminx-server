@@ -12,6 +12,10 @@ public class Result<T> {
     private String msg;
     private T data;
 
+    public static <T> Result<T> success() {
+        return new Result<>(200, "成功", null);
+    }
+
     public static <T> Result<T> success(T data) {
         return new Result<>(200, "成功", data);
     }

@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 新增：跳过公开接口
         String path = request.getRequestURI();
-        if (path.startsWith("/api/auth/")) {
+        if (path.startsWith("/api/")) {
             filterChain.doFilter(request, response);
             return;
         }
