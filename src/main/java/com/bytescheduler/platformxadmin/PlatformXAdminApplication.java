@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 
 @SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
-@MapperScan("com.bytescheduler.platformxadmin.modules.system.mapper")
+@MapperScan("com.bytescheduler.**.mapper")
 public class PlatformXAdminApplication {
 
 	public static void main(String[] args) {

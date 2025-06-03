@@ -21,13 +21,11 @@ spring:
     hibernate:
       ddl-auto: none
 
-# MyBatis 配置
-mybatis:
-  type-aliases-package: com.bytescheduler.platformxadmin.modules.system.entity
-  mapper-locations: classpath:mapper/**/*.xml  # XML 文件路径
+# MyBatisPlus 配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
   configuration:
-    map-underscore-to-camel-case: true        # 开启驼峰命名转换
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 控制台打印 SQL
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # JWT 配置（需与 JwtTokenUtil 中的字段对应）
 jwt:

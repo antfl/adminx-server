@@ -1,5 +1,6 @@
 package com.bytescheduler.platformxadmin.modules.system.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.bytescheduler.platformxadmin.modules.system.entity.Menu;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,8 +13,8 @@ import java.util.List;
  * @description
  */
 @Mapper
-public interface MenuMapper {
-    void insert(Menu entity);
+public interface MenuMapper extends BaseMapper<Menu> {
+    int insert(Menu entity);
     void update(Menu entity);
     void deleteById(@Param("menuId") Long menuId);
     Menu selectById(@Param("menuId") Long menuId);

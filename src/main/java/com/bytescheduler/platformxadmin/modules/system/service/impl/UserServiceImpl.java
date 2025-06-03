@@ -1,5 +1,6 @@
 package com.bytescheduler.platformxadmin.modules.system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bytescheduler.platformxadmin.common.exception.BusinessException;
 import com.bytescheduler.platformxadmin.common.utils.JwtTokenUtil;
 import com.bytescheduler.platformxadmin.modules.system.dto.UserLoginDTO;
@@ -26,16 +27,19 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void register(UserRegisterDTO dto) {
-        // 检查用户名唯一性
-        if (userMapper.selectByUsername(dto.getUsername()) != null) {
+        // 1. 修改用户名检查方式（使用 QueryWrapper）
+        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", dto.getUsername());
+        if (userMapper.selectCount(queryWrapper) > 0) {
             throw new BusinessException("用户名已存在");
         }
 
         SysUser user = new SysUser();
         BeanUtils.copyProperties(dto, user);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setAvatar("https://default-avatar-url.png"); // 默认头像
-        userMapper.insertUser(user);
+        user.setAvatar("https://default-avatar-url.png");
+
+        userMapper.insert(user);
     }
 
     @Override
