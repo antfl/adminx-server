@@ -30,7 +30,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public void saveMenu(MenuDTO dto) {
         // 通用校验
-        if (dto.getMenuType() == 3 && StringUtils.isEmpty(dto.getPerms())) {
+        if (dto.getMenuType() == 3 && !StringUtils.hasLength(dto.getPerms())) {
             throw new IllegalArgumentException("按钮必须设置权限标识");
         }
 
@@ -61,7 +61,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public List<Menu> getMenuTree() {
-        List<Menu> allMenus = menuMapper.selectAll();
+        List<Menu> allMenus = menuMapper.selectList(null);
         Map<Long, List<Menu>> parentMap = allMenus.stream()
                 .collect(Collectors.groupingBy(Menu::getParentId));
 

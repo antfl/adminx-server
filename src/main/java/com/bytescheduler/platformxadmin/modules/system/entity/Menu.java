@@ -1,5 +1,9 @@
 package com.bytescheduler.platformxadmin.modules.system.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,8 +16,10 @@ import java.util.List;
  * @description
  */
 @Accessors(chain = true)
+@TableName(value = "sys_menu")
 @Data
 public class Menu {
+    @TableId(value = "menu_id",type = IdType.AUTO)
     private Long menuId;
     private Long parentId = 0L;
     private String menuName;
@@ -30,5 +36,6 @@ public class Menu {
     private Date createTime;
     private Date updateTime;
 
+    @TableField(exist = false)
     private List<Menu> children;
 }

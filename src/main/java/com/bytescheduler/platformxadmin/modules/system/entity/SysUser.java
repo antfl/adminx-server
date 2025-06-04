@@ -9,7 +9,7 @@ import java.util.Date;
 @Data
 @TableName("sys_user")
 public class SysUser {
-    @TableId(type = IdType.AUTO)
+    @TableId(value = "user_id", type = IdType.AUTO)
     private Long userId;
     private Long deptId;
     private String username;
