@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.bytescheduler</groupId>
-    <artifactId>platform-x-admin</artifactId>
+    <artifactId>admin-x</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>platform-x-admin</name>
-    <description>platform-x-admin</description>
+    <name>Admin X</name>
+    <description>Admin X</description>
     <url/>
     <licenses>
         <license/>
