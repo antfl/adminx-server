@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bytescheduler.platformxadmin.modules.system.mapper.SysUserMapper">
+<mapper namespace="com.bytescheduler.adminx.modules.system.mapper.SysUserMapper">
     <select id="selectByUsername" resultType="SysUser">
         SELECT *
         FROM sys_user

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bytescheduler.platformxadmin.modules.system.mapper.MenuMapper">
+<mapper namespace="com.bytescheduler.adminx.modules.system.mapper.MenuMapper">
     <insert id="insert" useGeneratedKeys="true" keyProperty="menuId">
         INSERT INTO sys_menu
         (parent_id, menu_name, menu_type, path, component,
@@ -27,7 +27,7 @@
         WHERE menu_id = #{menuId}
     </update>
 
-    <select id="selectAll" resultType="com.bytescheduler.platformxadmin.modules.system.entity.Menu">
+    <select id="selectAll" resultType="com.bytescheduler.adminx.modules.system.entity.Menu">
         SELECT * FROM sys_menu
     </select>
 
