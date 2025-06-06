@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.bytescheduler</groupId>
-    <artifactId>admin-x</artifactId>
+    <artifactId>admin-x-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Admin X</name>
     <description>Admin X</description>

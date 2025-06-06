@@ -1,6 +1,6 @@
 package com.bytescheduler.adminx.modules.system.service.impl;
 
-import com.bytescheduler.adminx.modules.system.dto.MenuDTO;
+import com.bytescheduler.adminx.modules.system.dto.MenuRequest;
 import com.bytescheduler.adminx.modules.system.entity.Menu;
 import com.bytescheduler.adminx.modules.system.mapper.MenuMapper;
 import com.bytescheduler.adminx.modules.system.service.MenuService;
@@ -17,8 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author byte-scheduler
- * @date 2025/5/14 21:22
- * @description
+ * @since 2025/5/14
  */
 @Service
 @RequiredArgsConstructor
@@ -28,9 +27,9 @@ public class MenuServiceImpl implements MenuService {
 
     @Transactional
     @Override
-    public void saveMenu(MenuDTO dto) {
+    public void saveMenu(MenuRequest dto) {
         // 通用校验
-        if (dto.getMenuType() == 3 && StringUtils.isEmpty(dto.getPerms())) {
+        if (dto.getMenuType() == 3 && StringUtils.hasLength(dto.getPerms())) {
             throw new IllegalArgumentException("按钮必须设置权限标识");
         }
 
@@ -71,7 +70,7 @@ public class MenuServiceImpl implements MenuService {
         return parentMap.getOrDefault(0L, Collections.emptyList());
     }
 
-    private Menu convertToEntity(MenuDTO dto) {
+    private Menu convertToEntity(MenuRequest dto) {
         // 使用BeanUtils或手动映射
         Menu menu = new Menu();
         BeanUtils.copyProperties(dto, menu);

@@ -1,9 +1,9 @@
 package com.bytescheduler.adminx.modules.system.service;
 
-import com.bytescheduler.adminx.modules.system.dto.UserLoginDTO;
-import com.bytescheduler.adminx.modules.system.dto.UserRegisterDTO;
+import com.bytescheduler.adminx.modules.system.dto.UserLoginRequest;
+import com.bytescheduler.adminx.modules.system.dto.UserRegisterRequest;
 
 public interface UserService {
-    void register(UserRegisterDTO dto);
-    String login(UserLoginDTO dto);
+    void register(UserRegisterRequest dto);
+    String login(UserLoginRequest dto);
 }

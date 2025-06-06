@@ -7,8 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author byte-scheduler
- * @date 2025/6/4 6:51
- * @description
+ * @since 2025/6/4
  */
 @Configuration
 public class MybatisPlusConfig {

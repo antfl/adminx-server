@@ -8,11 +8,10 @@ import javax.validation.constraints.NotNull;
 
 /**
  * @author byte-scheduler
- * @date 2025/5/14 21:43
- * @description
+ * @since 2025/5/14
  */
 @Data
-public class MenuDTO {
+public class MenuRequest {
     private Long menuId;
     @NotBlank(message = "菜单名称不能为空")
     private String menuName;

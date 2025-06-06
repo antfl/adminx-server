@@ -9,15 +9,19 @@ import java.util.List;
 
 /**
  * @author byte-scheduler
- * @date 2025/5/14 21:05
- * @description
+ * @since 2025/5/14
  */
 @Mapper
 public interface MenuMapper extends BaseMapper<Menu> {
     int insert(Menu entity);
+
     void update(Menu entity);
+
     void deleteById(@Param("menuId") Long menuId);
+
     Menu selectById(@Param("menuId") Long menuId);
+
     List<Menu> selectAll();
+
     boolean existsByParentId(@Param("parentId") Long parentId);
 }

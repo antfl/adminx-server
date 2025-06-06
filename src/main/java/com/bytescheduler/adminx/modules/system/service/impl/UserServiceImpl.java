@@ -3,8 +3,8 @@ package com.bytescheduler.adminx.modules.system.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.JwtTokenUtil;
-import com.bytescheduler.adminx.modules.system.dto.UserLoginDTO;
-import com.bytescheduler.adminx.modules.system.dto.UserRegisterDTO;
+import com.bytescheduler.adminx.modules.system.dto.UserLoginRequest;
+import com.bytescheduler.adminx.modules.system.dto.UserRegisterRequest;
 import com.bytescheduler.adminx.modules.system.entity.SysUser;
 import com.bytescheduler.adminx.modules.system.mapper.SysUserMapper;
 import com.bytescheduler.adminx.modules.system.service.UserService;
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void register(UserRegisterDTO dto) {
+    public void register(UserRegisterRequest dto) {
         // 1. 修改用户名检查方式（使用 QueryWrapper）
         QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", dto.getUsername());
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(UserLoginDTO dto) {
+    public String login(UserLoginRequest dto) {
         SysUser user = userMapper.selectByUsername(dto.getUsername());
         if (user == null) {
             throw new BusinessException("用户不存在");
