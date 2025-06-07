@@ -26,8 +26,7 @@ public class Knife4jConfig {
                 .apis(RequestHandlerSelectors.basePackage("com.bytescheduler.adminx"))
                 .paths(PathSelectors.any())
                 .build()
-                .enableUrlTemplating(true)
-                .pathMapping("/api");
+                .enableUrlTemplating(true);
     }
 
     private ApiInfo apiInfo() {

@@ -4,11 +4,15 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * @author byte-scheduler
+ * @since 2025/6/7
+ */
 @Data
-public class UserLoginRequest {
-    @NotBlank(message = "用户名不能为空")
+public class LoginRequest {
+    @NotBlank(message = "Username cannot be blank")
     private String username;
 
-    @NotBlank(message = "密码不能为空")
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 }

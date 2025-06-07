@@ -21,6 +21,12 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: none
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+    timeout: 5000ms
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -33,8 +39,10 @@ mybatis-plus:
 
 # JWT 配置（需与 JwtTokenUtil 中的字段对应）
 jwt:
-  secret: "your-secret-key-here"
-  expiration: 3600                # 过期时间（秒）
+  secret: 256-bit-secret-1234567890abcdefghijklmnopqrstuvwxyz
+  expiration: 3600
+  token-header: Authorization
+  token-prefix: "Bearer "           # 过期时间（秒）
 
 knife4j:
   enable: true
@@ -51,7 +59,7 @@ knife4j:
 logging:
   level:
     root: info
-    com.bytescheduler.platform: debug  # 项目包日志级别
-    org.springframework.security: DEBUG
+    com.bytescheduler.adminx: debug  # 项目包日志级别
+    org.springframework.security: debug
   file:
     name: logs/app.log

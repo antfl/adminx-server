@@ -4,11 +4,16 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 
+@Entity
 @Data
 @TableName("sys_user")
-public class SysUser {
+public class User {
+    @Id
     @TableId(type = IdType.AUTO)
     private Long userId;
     private Long deptId;

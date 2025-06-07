@@ -13,7 +13,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public Result<?> handleException() {
-        return Result.failed("系统繁忙，请稍后再试");
+    public Result<?> handleException(Exception e) {
+        return Result.failed(e.getMessage());
     }
 }

@@ -1,6 +1,5 @@
 package com.bytescheduler.adminx.modules.system.service.impl;
 
-import com.bytescheduler.adminx.modules.system.entity.SysUser;
 import com.bytescheduler.adminx.modules.system.mapper.SysUserMapper;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.User;
@@ -27,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 1. 查询数据库中的用户
-        SysUser sysUser = sysUserMapper.selectByUsername(username);
+        com.bytescheduler.adminx.modules.system.entity.User sysUser = sysUserMapper.selectByUsername(username);
         if (sysUser == null) {
             throw new UsernameNotFoundException("用户不存在: " + username);
         }
