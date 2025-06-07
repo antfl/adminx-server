@@ -29,14 +29,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws IOException, ServletException {
 
-        // 新增：跳过公开接口
         String path = request.getRequestURI();
         if (path.startsWith("/api/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 原有逻辑
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);

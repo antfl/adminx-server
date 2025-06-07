@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 
 @SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
 @MapperScan("com.bytescheduler.**.mapper")
-public class PlatformXAdminApplication {
+public class AdminXApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PlatformXAdminApplication.class, args);
+		SpringApplication.run(AdminXApplication.class, args);
 	}
 
 }

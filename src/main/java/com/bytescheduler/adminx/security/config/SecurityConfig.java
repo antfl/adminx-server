@@ -20,13 +20,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsService userDetailsService;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtTokenUtil, userDetailsService);
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/auth/**", "/menu/**").permitAll()
+                .antMatchers(
+                        "/auth/**",
+                        "/menu/**",
+                        "/doc.html",
+                        "/webjars/**",
+                        "/v2/api-docs",
+                        "/swagger-resources/**",
+                        "/api/doc.html",
+                        "/api/webjars/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

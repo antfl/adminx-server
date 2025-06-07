@@ -24,7 +24,11 @@ public class Result<T> {
         return new Result<>(200, msg, data);
     }
 
-    public static <T> Result<T> fail(String msg) {
+    public static <T> Result<T> failed() {
+        return new Result<>(500, "失败", null);
+    }
+
+    public static <T> Result<T> failed(String msg) {
         return new Result<>(500, msg, null);
     }
 }

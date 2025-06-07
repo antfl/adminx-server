@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-@Primary // 确保覆盖默认的 InMemoryUserDetailsManager
+@Primary
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final SysUserMapper sysUserMapper;

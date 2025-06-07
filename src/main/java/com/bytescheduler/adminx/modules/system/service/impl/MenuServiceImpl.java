@@ -1,79 +1,32 @@
 package com.bytescheduler.adminx.modules.system.service.impl;
 
-import com.bytescheduler.adminx.modules.system.dto.MenuRequest;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.modules.system.entity.Menu;
 import com.bytescheduler.adminx.modules.system.mapper.MenuMapper;
 import com.bytescheduler.adminx.modules.system.service.MenuService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-/**
- * @author byte-scheduler
- * @since 2025/5/14
- */
 @Service
-@RequiredArgsConstructor
-public class MenuServiceImpl implements MenuService {
+public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
-    private final MenuMapper menuMapper;
 
-    @Transactional
-    @Override
-    public void saveMenu(MenuRequest dto) {
-        // 通用校验
-        if (dto.getMenuType() == 3 && StringUtils.hasLength(dto.getPerms())) {
-            throw new IllegalArgumentException("按钮必须设置权限标识");
-        }
-
-        Menu menu = convertToEntity(dto);
-        if (dto.getMenuId() == null) {
-            // 新增逻辑
-            if (dto.getParentId() != 0 && menuMapper.selectById(dto.getParentId()) == null) {
-                throw new IllegalArgumentException("父菜单不存在");
-            }
-            menuMapper.insert(menu);
-        } else {
-            // 更新逻辑
-            if (dto.getParentId().equals(dto.getMenuId())) {
-                throw new IllegalArgumentException("不能设置自己为父菜单");
-            }
-            menuMapper.update(menu);
-        }
-    }
-
-    @Transactional
-    @Override
-    public void deleteMenu(Long menuId) {
-        if (menuMapper.existsByParentId(menuId)) {
-            throw new IllegalArgumentException("存在子菜单不可删除");
-        }
-        menuMapper.deleteById(menuId);
-    }
 
     @Override
     public List<Menu> getMenuTree() {
-        List<Menu> allMenus = menuMapper.selectAll();
-        Map<Long, List<Menu>> parentMap = allMenus.stream()
-                .collect(Collectors.groupingBy(Menu::getParentId));
-
-        allMenus.forEach(menu ->
-                menu.setChildren(parentMap.getOrDefault(menu.getMenuId(), Collections.emptyList())));
-
-        return parentMap.getOrDefault(0L, Collections.emptyList());
+        List<Menu> allMenus = this.list(new LambdaQueryWrapper<Menu>()
+                .orderByAsc(Menu::getSortOrder));
+        return allMenus;
     }
 
-    private Menu convertToEntity(MenuRequest dto) {
-        // 使用BeanUtils或手动映射
+
+    @Override
+    public boolean updateMenuStatus(Long menuId, Integer status) {
         Menu menu = new Menu();
-        BeanUtils.copyProperties(dto, menu);
-        return menu;
+        menu.setId(menuId);
+        menu.setStatus(status);
+        return this.updateById(menu);
     }
 }

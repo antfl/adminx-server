@@ -8,11 +8,12 @@ server:
 spring:
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true
   application:
-    name: platform-x-admin
+    name: admin-x
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/platform_x_admin?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/admin_x?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
   # JPA/Hibernate 配置（可选）
@@ -20,6 +21,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: none
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 # MyBatisPlus 配置
 mybatis-plus:
@@ -29,8 +33,19 @@ mybatis-plus:
 
 # JWT 配置（需与 JwtTokenUtil 中的字段对应）
 jwt:
-  secret: "your-secret-key-here"  # 加密密钥（建议使用环境变量）
+  secret: "your-secret-key-here"
   expiration: 3600                # 过期时间（秒）
+
+knife4j:
+  enable: true
+  production: false
+  setting:
+    language: zh-CN
+  # 添加上下文路径配置
+  documents:
+    - group: 默认
+      name: 接口文档
+      locations: classpath:group.json
 
 # 日志配置（可选）
 logging:

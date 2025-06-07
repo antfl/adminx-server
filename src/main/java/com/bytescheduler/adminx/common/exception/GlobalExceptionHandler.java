@@ -9,11 +9,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public Result<?> handleBusinessException(BusinessException e) {
-        return Result.fail(e.getMessage());
+        return Result.failed(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
-    public Result<?> handleException(Exception e) {
-        return Result.fail("系统繁忙，请稍后再试");
+    public Result<?> handleException() {
+        return Result.failed("系统繁忙，请稍后再试");
     }
 }
