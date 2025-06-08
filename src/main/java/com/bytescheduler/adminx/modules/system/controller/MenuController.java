@@ -24,7 +24,7 @@ public class MenuController {
         this.menuService = menuService;
     }
 
-    @PostMapping
+    @PostMapping("/save")
     @ApiOperation("创建菜单")
     public Result<Long> create(@RequestBody @Validated Menu menu) {
         boolean success = menuService.save(menu);
