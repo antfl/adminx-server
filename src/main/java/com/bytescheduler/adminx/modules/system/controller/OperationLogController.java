@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
  * @since 2025/6/8
  */
 @RestController
-@RequestMapping("/api/logs")
+@RequestMapping("/logs")
 public class OperationLogController {
     private final OperationLogService logService;
 
