@@ -1,7 +1,9 @@
 package com.bytescheduler.adminx.modules.system.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bytescheduler.adminx.annotation.Log;
 import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.enums.OperationType;
 import com.bytescheduler.adminx.modules.system.dto.RoleRequest;
 import com.bytescheduler.adminx.modules.system.dto.RoleQueryRequest;
 import com.bytescheduler.adminx.modules.system.entity.SysRole;
@@ -24,6 +26,7 @@ public class RoleController {
     private final RoleService roleService;
 
     // 角色分页查询
+    @Log(module = "角色管理", type = OperationType.SELECT, value = "角色查询")
     @GetMapping
     public Result<Page<SysRole>> listRoles(RoleQueryRequest queryRequest) {
         return Result.success(roleService.listRoles(queryRequest));
