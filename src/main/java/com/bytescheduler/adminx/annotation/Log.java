@@ -12,9 +12,12 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Log {
-    String module() default "";      // 操作模块
+    // 操作模块
+    String module() default "";
 
-    OperationType type() default OperationType.OTHER; // 操作类型
+    // 操作类型
+    OperationType type() default OperationType.OTHER;
 
-    String value() default "";       // 操作描述
+    // 操作描述
+    String value() default "";
 }

@@ -1,9 +1,12 @@
 package com.bytescheduler.adminx.enums;
 
+import lombok.Getter;
+
 /**
  * @author byte-scheduler
  * @since 2025/6/8 22:18
  */
+@Getter
 public enum OperationType {
 
     INSERT("新增"),
@@ -18,7 +21,4 @@ public enum OperationType {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
 }

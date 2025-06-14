@@ -2,7 +2,6 @@ package com.bytescheduler.adminx.modules.system.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.common.domain.Result;
-import com.bytescheduler.adminx.modules.system.dto.MenuTreeRequest;
 import com.bytescheduler.adminx.modules.system.entity.Menu;
 import com.bytescheduler.adminx.modules.system.service.MenuService;
 import io.swagger.annotations.Api;
@@ -55,10 +54,8 @@ public class MenuController {
 
     @GetMapping("/tree")
     @ApiOperation("获取菜单树")
-    public Result<List<MenuTreeRequest>> getMenuTree() {
-        List<MenuTreeRequest> menuTree = menuService.getMenuTree().stream()
-                .map(this::convertToTreeRequest)
-                .collect(Collectors.toList());
+    public Result<List<Menu>> getMenuTree() {
+        List<Menu> menuTree = menuService.getMenuTree();
         return Result.success(menuTree);
     }
 
@@ -79,24 +76,5 @@ public class MenuController {
             @RequestParam Integer status) {
         boolean success = menuService.updateMenuStatus(id, status);
         return success ? Result.success() : Result.failed();
-    }
-
-    private MenuTreeRequest convertToTreeRequest(Menu menu) {
-        MenuTreeRequest dto = new MenuTreeRequest();
-        dto.setId(menu.getId());
-        dto.setParentId(menu.getParentId());
-        dto.setName(menu.getName());
-        dto.setTitle(menu.getTitle());
-        dto.setPath(menu.getPath());
-        dto.setComponent(menu.getComponent());
-        dto.setIcon(menu.getIcon());
-        dto.setCache(menu.getCache());
-        dto.setVisible(menu.getVisible());
-        dto.setRedirect(menu.getRedirect());
-        dto.setMenuType(menu.getMenuType());
-        dto.setPermission(menu.getPermission());
-        dto.setSortOrder(menu.getSortOrder());
-        dto.setStatus(menu.getStatus());
-        return dto;
     }
 }

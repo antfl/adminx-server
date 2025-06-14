@@ -7,18 +7,18 @@ import com.bytescheduler.adminx.modules.system.mapper.MenuMapper;
 import com.bytescheduler.adminx.modules.system.service.MenuService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
-
 
 
     @Override
     public List<Menu> getMenuTree() {
         List<Menu> allMenus = this.list(new LambdaQueryWrapper<Menu>()
                 .orderByAsc(Menu::getSortOrder));
-        return allMenus;
+        return buildMenuTree(allMenus);
     }
 
 
@@ -28,5 +28,37 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         menu.setId(menuId);
         menu.setStatus(status);
         return this.updateById(menu);
+    }
+
+    private List<Menu> buildMenuTree(List<Menu> menus) {
+        Map<Long, Menu> menuMap = menus.stream()
+                .collect(Collectors.toMap(Menu::getId, menu -> menu));
+
+        List<Menu> rootMenus = new ArrayList<>();
+        menus.forEach(menu -> {
+            Long parentId = menu.getParentId();
+            if (parentId == 0) {
+                rootMenus.add(menu);
+            } else {
+                Menu parent = menuMap.get(parentId);
+                if (parent != null) {
+                    if (parent.getChildren() == null) {
+                        parent.setChildren(new ArrayList<>());
+                    }
+                    parent.getChildren().add(menu);
+                }
+            }
+        });
+
+        rootMenus.sort(Comparator.comparingInt(Menu::getSortOrder));
+        rootMenus.forEach(this::sortChildren);
+        return rootMenus;
+    }
+
+    private void sortChildren(Menu menu) {
+        if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+            menu.getChildren().sort(Comparator.comparingInt(Menu::getSortOrder));
+            menu.getChildren().forEach(this::sortChildren);
+        }
     }
 }
