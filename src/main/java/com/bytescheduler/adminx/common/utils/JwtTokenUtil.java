@@ -1,7 +1,10 @@
 package com.bytescheduler.adminx.common.utils;
 
+import com.bytescheduler.adminx.common.exception.InvalidTokenException;
+import com.bytescheduler.adminx.common.exception.TokenExpiredException;
 import com.bytescheduler.adminx.security.config.JwtConfig;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
@@ -29,11 +32,19 @@ public class JwtTokenUtil {
     }
 
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtConfig.getSecret())
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(jwtConfig.getSecret())
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException ex) {
+            // 令牌过期
+            throw new TokenExpiredException("登录已过期，请重新登录");
+        } catch (Exception ex) {
+            // 无效令牌
+            throw new InvalidTokenException("无效的登录凭证");
+        }
     }
 
     public boolean validateToken(String token) {

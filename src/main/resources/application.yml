@@ -16,7 +16,7 @@ spring:
     url: jdbc:mysql://localhost:3306/admin_x?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
-  # JPA/Hibernate 配置（可选）
+  # JPA/Hibernate 配置
   jpa:
     show-sql: true
     hibernate:
@@ -40,9 +40,9 @@ mybatis-plus:
 # JWT 配置（需与 JwtTokenUtil 中的字段对应）
 jwt:
   secret: 256-bit-secret-1234567890abcdefghijklmnopqrstuvwxyz
-  expiration: 3600
+  expiration: 604800 # 过期时间（秒）
   token-header: Authorization
-  token-prefix: "Bearer "           # 过期时间（秒）
+  token-prefix: "Bearer "
 
 knife4j:
   enable: true
@@ -55,7 +55,7 @@ knife4j:
       name: 接口文档
       locations: classpath:group.json
 
-# 日志配置（可选）
+# 日志配置
 logging:
   level:
     root: info

@@ -1,9 +1,7 @@
 package com.bytescheduler.adminx.security.config;
 
-import com.bytescheduler.adminx.common.utils.JwtTokenUtil;
 import com.bytescheduler.adminx.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

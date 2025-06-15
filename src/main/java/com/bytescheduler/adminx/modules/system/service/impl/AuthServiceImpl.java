@@ -36,7 +36,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void register(RegisterRequest request) {
-        // 1. 修改用户名检查方式（使用 QueryWrapper）
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", request.getUsername());
         if (userMapper.selectCount(queryWrapper) > 0) {
@@ -62,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
                 username,
                 token,
                 jwtTokenUtil.getExpirationFromToken(token),
-                TimeUnit.DAYS
+                TimeUnit.MILLISECONDS
         );
 
         return new TokenResponse(token);
