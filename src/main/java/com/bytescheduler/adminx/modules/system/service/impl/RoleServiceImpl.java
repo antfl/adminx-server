@@ -4,15 +4,25 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bytescheduler.adminx.common.domain.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
+import com.bytescheduler.adminx.modules.system.dto.RolePermissionsRequest;
 import com.bytescheduler.adminx.modules.system.dto.RoleRequest;
 import com.bytescheduler.adminx.modules.system.dto.RoleQueryRequest;
+import com.bytescheduler.adminx.modules.system.entity.Menu;
 import com.bytescheduler.adminx.modules.system.entity.SysRole;
+import com.bytescheduler.adminx.modules.system.mapper.MenuMapper;
 import com.bytescheduler.adminx.modules.system.mapper.RoleMapper;
+import com.bytescheduler.adminx.modules.system.mapper.RoleMenuMapper;
+import com.bytescheduler.adminx.modules.system.service.MenuService;
 import com.bytescheduler.adminx.modules.system.service.RoleService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author byte-scheduler
@@ -21,9 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, SysRole> implements RoleService {
     private final RoleMapper roleMapper;
+    private final RoleMenuMapper roleMenuMapper;
+    private final MenuMapper menuMapper;
 
-    public RoleServiceImpl(RoleMapper roleMapper) {
+    private final MenuService menuService;
+
+    public RoleServiceImpl(RoleMapper roleMapper, RoleMenuMapper roleMenuMapper, MenuMapper menuMapper, MenuService menuService) {
         this.roleMapper = roleMapper;
+        this.roleMenuMapper = roleMenuMapper;
+        this.menuMapper = menuMapper;
+        this.menuService = menuService;
     }
 
     @Override
@@ -74,5 +91,37 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, SysRole> implements
         BeanUtils.copyProperties(dto, role);
         role.setRoleId(roleId);
         updateById(role);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Result<RolePermissionsRequest> getRolePermissions(Long roleId) {
+        SysRole role = roleMapper.selectById(roleId);
+        if (role == null) {
+            return Result.failed("角色不存在");
+        }
+
+        List<Long> menuIds = roleMenuMapper.selectMenuIdsByRoleId(roleId);
+        if (menuIds.isEmpty()) {
+            return Result.success(new RolePermissionsRequest(roleId, role.getRoleName(),
+                    role.getRoleKey(), Collections.emptyList(), Collections.emptyList()));
+        }
+
+        List<Menu> menus = menuMapper.selectBatchIds(menuIds);
+
+        List<Menu> menuTree = menuService.getMenuTree();
+
+        List<Long> permissionKeys = menus.stream()
+                .map(Menu::getId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        RolePermissionsRequest dto = new RolePermissionsRequest();
+        dto.setRoleId(roleId);
+        dto.setRoleName(role.getRoleName());
+        dto.setRoleKey(role.getRoleKey());
+        dto.setMenuTree(menuTree);
+        dto.setPermissionKeys(permissionKeys);
+        return Result.success(dto);
     }
 }

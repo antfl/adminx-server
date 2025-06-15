@@ -30,7 +30,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return this.updateById(menu);
     }
 
-    private List<Menu> buildMenuTree(List<Menu> menus) {
+    @Override
+    public List<Menu> buildMenuTree(List<Menu> menus) {
         Map<Long, Menu> menuMap = menus.stream()
                 .collect(Collectors.toMap(Menu::getId, menu -> menu));
 

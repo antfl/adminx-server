@@ -4,9 +4,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.annotation.Log;
 import com.bytescheduler.adminx.common.domain.Result;
 import com.bytescheduler.adminx.enums.OperationType;
+import com.bytescheduler.adminx.modules.system.dto.RoleMenuRequest;
+import com.bytescheduler.adminx.modules.system.dto.RolePermissionsRequest;
 import com.bytescheduler.adminx.modules.system.dto.RoleRequest;
 import com.bytescheduler.adminx.modules.system.dto.RoleQueryRequest;
 import com.bytescheduler.adminx.modules.system.entity.SysRole;
+import com.bytescheduler.adminx.modules.system.service.RoleMenuService;
 import com.bytescheduler.adminx.modules.system.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +27,7 @@ import java.util.Arrays;
 public class RoleController {
 
     private final RoleService roleService;
+    private final RoleMenuService roleMenuService;
 
     // 角色分页查询
     @Log(module = "角色管理", type = OperationType.SELECT, value = "角色查询")
@@ -82,5 +86,17 @@ public class RoleController {
         role.setStatus(status);
         roleService.updateById(role);
         return Result.success("状态更新成功");
+    }
+
+    // 获取角色权限
+    @GetMapping("/permission/{roleId}")
+    public Result<RolePermissionsRequest> getRolePermissions(@PathVariable Long roleId) {
+        return roleService.getRolePermissions(roleId);
+    }
+
+    // 编辑角色菜单权限
+    @PostMapping("/setRoleMenus")
+    public Result<String> setRoleMenus(@Valid @RequestBody RoleMenuRequest dto) {
+        return roleMenuService.setRoleMenus(dto);
     }
 }
