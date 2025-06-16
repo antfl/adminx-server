@@ -1,4 +1,5 @@
 package com.bytescheduler.adminx.modules.system.controller;
+import io.swagger.annotations.Api;
 import org.springframework.data.domain.Page;
 import com.bytescheduler.adminx.modules.system.entity.OperationLog;
 import com.bytescheduler.adminx.modules.system.service.OperationLogService;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
  * @author byte-scheduler
  * @since 2025/6/8
  */
+@Api(tags = "系统日志")
 @RestController
 @RequestMapping("/logs")
 public class OperationLogController {
@@ -30,7 +32,7 @@ public class OperationLogController {
     public Page<OperationLog> getLogs(
             @RequestParam(required = false) String operator,
             @RequestParam(required = false) String module,
-            @PageableDefault(size = 10, sort = "operationTime", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = "operationTime", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return logService.getLogs(operator, module, pageable);
     }
