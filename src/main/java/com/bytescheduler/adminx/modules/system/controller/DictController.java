@@ -27,7 +27,7 @@ public class DictController {
     private final SysDictService dictService;
     private final SysDictItemService dictItemService;
 
-    @PostMapping("/add")
+    @PostMapping("/save")
     @ApiOperation("新增字典")
     public Result<SysDict> createDict(@RequestBody SysDict dict) {
         if (dictService.save(dict)) {
