@@ -27,13 +27,36 @@ public class DictController {
     private final SysDictService dictService;
     private final SysDictItemService dictItemService;
 
-    @PostMapping("/save")
-    @ApiOperation("新增字典")
+    @PostMapping("/saveUpdate")
+    @ApiOperation("保存字典（新增或修改）")
     public Result<SysDict> createDict(@RequestBody SysDict dict) {
-        if (dictService.save(dict)) {
-            return Result.success(dict);
+        if (dict == null) {
+            return Result.failed("字典数据不能为空");
         }
-        return Result.failed("新增失败");
+
+        boolean operationResult = dictService.saveOrUpdate(dict);
+
+        if (operationResult) {
+            SysDict savedDict = dictService.getById(dict.getId());
+            return Result.success("保存成功", savedDict);
+        }
+        return Result.failed(dict.getId() != null ? "修改失败" : "新增失败");
+    }
+
+    @PostMapping("/saveUpdateData")
+    @ApiOperation("保存字典（新增或修改）")
+    public Result<SysDictItem> saveUpdateData(@RequestBody SysDictItem dictItem) {
+        if (dictItem == null) {
+            return Result.failed("字典数据不能为空");
+        }
+
+        boolean operationResult = dictItemService.saveOrUpdate(dictItem);
+
+        if (operationResult) {
+            SysDictItem savedDictItem = dictItemService.getById(dictItem.getId());
+            return Result.success("保存成功", savedDictItem);
+        }
+        return Result.failed(dictItem.getId() != null ? "修改失败" : "新增失败");
     }
 
     @GetMapping("/{id}")
