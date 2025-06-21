@@ -19,6 +19,7 @@ public class Article {
     private String title;
     private String content;
     private Long categoryId;
+    @TableField(fill = FieldFill.INSERT)
     private Long userId;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

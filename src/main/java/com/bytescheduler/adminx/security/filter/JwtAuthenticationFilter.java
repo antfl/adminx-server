@@ -3,6 +3,7 @@ package com.bytescheduler.adminx.security.filter;
 import com.bytescheduler.adminx.common.exception.InvalidTokenException;
 import com.bytescheduler.adminx.common.exception.TokenExpiredException;
 import com.bytescheduler.adminx.common.utils.JwtTokenUtil;
+import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.security.config.JwtConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain chain)
-            throws ServletException, IOException {
+            throws IOException {
         try {
             // 从请求头获取令牌
             String header = request.getHeader(jwtConfig.getTokenHeader());
@@ -72,6 +72,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                         new UsernamePasswordAuthenticationToken(username, null, null);
                                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                                Long userId = jwtTokenUtil.getUserIdFromToken(authToken);
+                                UserContext.setUserId(userId);
                             } else {
                                 // 令牌无效
                                 handleError(response, HttpServletResponse.SC_UNAUTHORIZED, "无效凭证", "令牌验证失败");
@@ -101,6 +104,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 全局异常处理
             handleError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "服务器错误", "服务器错误");
+        } finally {
+            UserContext.clear();
         }
     }
 

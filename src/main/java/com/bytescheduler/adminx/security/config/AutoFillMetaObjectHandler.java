@@ -1,6 +1,7 @@
 package com.bytescheduler.adminx.security.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.bytescheduler.adminx.common.utils.UserContext;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +18,17 @@ public class AutoFillMetaObjectHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
         this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+
+        Long userId = getCurrentUserId();
+        this.strictInsertFill(metaObject, "userId", Long.class, userId);
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
         this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+    }
+
+    private Long getCurrentUserId() {
+        return UserContext.getCurrentUserId();
     }
 }

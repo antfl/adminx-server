@@ -3,10 +3,7 @@ package com.bytescheduler.adminx.common.utils;
 import com.bytescheduler.adminx.common.exception.InvalidTokenException;
 import com.bytescheduler.adminx.common.exception.TokenExpiredException;
 import com.bytescheduler.adminx.security.config.JwtConfig;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -19,11 +16,12 @@ public class JwtTokenUtil {
         this.jwtConfig = jwtConfig;
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtConfig.getExpiration() * 1000);
 
         return Jwts.builder()
+                .claim("userId", userId)
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -62,5 +60,14 @@ public class JwtTokenUtil {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getExpiration().getTime() - System.currentTimeMillis();
+    }
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(jwtConfig.getSecret())
+                .parseClaimsJws(token)
+                .getBody();
+
+        return Long.parseLong(claims.get("userId").toString());
     }
 }

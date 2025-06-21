@@ -2,7 +2,6 @@ package com.bytescheduler.adminx.modules.system.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.common.domain.Result;
-import com.bytescheduler.adminx.common.utils.SecurityUtils;
 import com.bytescheduler.adminx.modules.system.dto.ArticleQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.ArticleRequest;
 import com.bytescheduler.adminx.modules.system.entity.Article;
@@ -26,8 +25,6 @@ public class ArticleController {
     @ApiOperation("保存文章（新增或修改）")
     @PostMapping("/save")
     public Result<?> saveArticle(@RequestBody Article article) {
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        article.setUserId(currentUserId);
         return articleService.saveOrUpdate(article) ?
                 Result.success() : Result.failed("保存失败");
     }

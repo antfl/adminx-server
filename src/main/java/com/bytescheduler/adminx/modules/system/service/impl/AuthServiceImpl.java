@@ -12,7 +12,6 @@ import com.bytescheduler.adminx.modules.system.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,6 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final RedisTemplate<String, String> redisTemplate;
-    private final AuthenticationManager authenticationManager;
 
     @Override
     @Transactional
@@ -53,9 +51,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public TokenResponse login(LoginRequest request) {
-
         String username = request.getUsername();
-        String token = jwtTokenUtil.generateToken(username);
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", request.getUsername());
+        User user = userMapper.selectOne(queryWrapper);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        String token = jwtTokenUtil.generateToken(username, user.getUserId());
 
         redisTemplate.opsForValue().set(
                 username,

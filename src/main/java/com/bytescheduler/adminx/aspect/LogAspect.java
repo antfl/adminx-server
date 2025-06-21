@@ -9,6 +9,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -18,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 
 /**
+ * 操作日志切面
+ *
  * @author byte-scheduler
  * @since 2025/6/8
  */
@@ -93,10 +97,12 @@ public class LogAspect {
 
         // 处理操作结果
         if (exception != null) {
-            log.setStatus(0); // 失败
+            // 失败
+            log.setStatus(0);
             log.setErrorMsg(exception.getMessage());
         } else {
-            log.setStatus(1); // 成功
+            // 成功
+            log.setStatus(1);
             if (result != null) {
                 try {
                     // 限制结果大小，避免存储过大对象
@@ -111,8 +117,8 @@ public class LogAspect {
             }
         }
 
-        // TODO: 获取当前用户
-        log.setOperator("admin");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.setOperator(authentication.getPrincipal().toString());
 
         logService.save(log);
     }
