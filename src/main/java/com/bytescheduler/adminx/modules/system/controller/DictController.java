@@ -44,7 +44,7 @@ public class DictController {
     }
 
     @PostMapping("/saveUpdateData")
-    @ApiOperation("保存字典（新增或修改）")
+    @ApiOperation("保存字典数据（新增或修改）")
     public Result<SysDictItem> saveUpdateData(@RequestBody SysDictItem dictItem) {
         if (dictItem == null) {
             return Result.failed("字典数据不能为空");
@@ -72,10 +72,17 @@ public class DictController {
         return dictService.getDictItemsByCode(dictCode);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteDict/{id}")
     @ApiOperation("删除字典")
     public Result<Void> deleteDict(@PathVariable Long id) {
         return dictService.removeById(id) ?
+                Result.success() : Result.failed("删除失败");
+    }
+
+    @DeleteMapping("/deleteDictData/{id}")
+    @ApiOperation("删除字典")
+    public Result<Void> deleteDictData(@PathVariable Long id) {
+        return dictItemService.removeById(id) ?
                 Result.success() : Result.failed("删除失败");
     }
 
