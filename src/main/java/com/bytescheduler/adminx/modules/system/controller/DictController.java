@@ -27,7 +27,7 @@ public class DictController {
     private final SysDictService dictService;
     private final SysDictItemService dictItemService;
 
-    @PostMapping("/saveUpdate")
+    @PostMapping("/saveDict")
     @ApiOperation("保存字典（新增或修改）")
     public Result<SysDict> createDict(@RequestBody SysDict dict) {
         if (dict == null) {
@@ -43,7 +43,7 @@ public class DictController {
         return Result.failed(dict.getId() != null ? "修改失败" : "新增失败");
     }
 
-    @PostMapping("/saveUpdateData")
+    @PostMapping("/saveDictData")
     @ApiOperation("保存字典数据（新增或修改）")
     public Result<SysDictItem> saveUpdateData(@RequestBody SysDictItem dictItem) {
         if (dictItem == null) {
