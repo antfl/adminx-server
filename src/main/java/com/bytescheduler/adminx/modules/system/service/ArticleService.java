@@ -3,6 +3,7 @@ package com.bytescheduler.adminx.modules.system.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.modules.system.dto.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.system.dto.ArticleQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.ArticleRequest;
 import com.bytescheduler.adminx.modules.system.entity.Article;
@@ -21,4 +22,6 @@ public interface ArticleService extends IService<Article> {
     void incrementLikeCount(Long articleId);
 
     void decrementLikeCount(Long articleId);
+
+    ArticleDetailResponse getArticleDetailById(Long id);
 }

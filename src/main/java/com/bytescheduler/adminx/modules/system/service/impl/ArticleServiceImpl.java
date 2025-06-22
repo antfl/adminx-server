@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.modules.system.dto.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.system.dto.ArticleQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.ArticleRequest;
 import com.bytescheduler.adminx.modules.system.entity.Article;
@@ -78,5 +80,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .setSql("like_count = GREATEST(0, like_count - 1)")
                 .eq(Article::getArticleId, articleId)
                 .update();
+    }
+
+    @Override
+    public ArticleDetailResponse getArticleDetailById(Long id) {
+        Long currentUserId = getCurrentUserId();
+        return articleMapper.selectArticleDetailById(id, currentUserId);
+    }
+
+    private Long getCurrentUserId() {
+        return UserContext.getCurrentUserId();
     }
 }

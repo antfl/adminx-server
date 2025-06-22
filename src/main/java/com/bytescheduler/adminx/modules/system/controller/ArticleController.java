@@ -2,6 +2,7 @@ package com.bytescheduler.adminx.modules.system.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.modules.system.dto.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.system.dto.ArticleQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.ArticleRequest;
 import com.bytescheduler.adminx.modules.system.entity.Article;
@@ -38,8 +39,8 @@ public class ArticleController {
 
     @ApiOperation("文章详情")
     @GetMapping("/{id}")
-    public Result<Article> getArticleById(@PathVariable Long id) {
-        return Result.success(articleService.getById(id));
+    public Result<ArticleDetailResponse> getArticleById(@PathVariable Long id) {
+        return Result.success(articleService.getArticleDetailById(id));
     }
 
     @ApiOperation("分页查询")
