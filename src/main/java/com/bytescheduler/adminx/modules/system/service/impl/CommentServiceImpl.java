@@ -17,10 +17,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @author byte-scheduler
@@ -51,18 +48,18 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 }
             }
         }
-//        comment.setAuditStatus(0);
         return save(comment);
     }
 
     @Override
     public Result<Page<CommentTreeResponse>> getCommentPage(CommentQueryRequest queryRequest) {
         QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
-        if (queryRequest.getArticleId() != null) {
-            queryWrapper.eq("c.article_id", queryRequest.getArticleId());
-        } else {
-            return Result.failed("文章ID不能为空");
+
+        if (queryRequest.getArticleId() == null) {
+            return Result.failed("文章 ID 不能为空");
         }
+        queryWrapper.eq("c.article_id", queryRequest.getArticleId());
+
         if (queryRequest.getUserId() != null) {
             queryWrapper.eq("c.user_id", queryRequest.getUserId());
         }
@@ -83,19 +80,60 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     }
 
     private List<CommentTreeResponse> buildCommentTree(List<CommentRequest> flatList) {
-        Map<Long, List<CommentTreeResponse>> replyMap = flatList.stream()
-                .filter(c -> c.getParentId() != 0)
-                .map(this::convertToTreeData)
-                .collect(Collectors.groupingBy(CommentTreeResponse::getParentId));
+        Map<Long, CommentTreeResponse> commentMap = new HashMap<>();
+        Map<Long, List<CommentTreeResponse>> topLevelRepliesMap = new HashMap<>();
+        List<CommentTreeResponse> topLevelComments = new ArrayList<>();
 
-        return flatList.stream()
-                .filter(c -> c.getParentId() == 0)
-                .map(topComment -> {
-                    CommentTreeResponse node = convertToTreeData(topComment);
-                    node.setReplies(replyMap.getOrDefault(node.getId(), Collections.emptyList()));
-                    return node;
-                })
-                .collect(Collectors.toList());
+        for (CommentRequest dto : flatList) {
+            CommentTreeResponse vo = convertToTreeData(dto);
+            commentMap.put(vo.getId(), vo);
+
+            if (vo.getParentId() == 0) {
+                topLevelComments.add(vo);
+                topLevelRepliesMap.put(vo.getId(), new ArrayList<>());
+            }
+        }
+
+        for (CommentRequest dto : flatList) {
+            if (dto.getParentId() != 0) {
+                CommentTreeResponse reply = convertToTreeData(dto);
+                Long rootCommentId = findRootCommentId(dto.getCommentId(), commentMap);
+
+                if (rootCommentId != null) {
+                    List<CommentTreeResponse> replies = topLevelRepliesMap.get(rootCommentId);
+                    if (replies != null) {
+                        replies.add(reply);
+                    }
+                }
+            }
+        }
+
+        for (CommentTreeResponse top : topLevelComments) {
+            List<CommentTreeResponse> replies = topLevelRepliesMap.get(top.getId());
+            if (replies != null) {
+                replies.sort(Comparator.comparing(CommentTreeResponse::getCreateTime));
+                top.setReplies(replies);
+            }
+        }
+
+        return topLevelComments;
+    }
+
+    private Long findRootCommentId(Long commentId, Map<Long, CommentTreeResponse> commentMap) {
+        Long currentId = commentId;
+        int maxDepth = 10;
+        while (maxDepth-- > 0) {
+            CommentTreeResponse current = commentMap.get(currentId);
+            if (current == null) return null;
+
+            if (current.getParentId() == 0) {
+                return current.getId();
+            }
+
+            currentId = current.getParentId();
+        }
+
+        return null;
     }
 
 
@@ -104,8 +142,6 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     public Result<?> auditComment(Long commentId, Integer auditStatus, String auditRemark) {
         Comment comment = new Comment();
         comment.setCommentId(commentId);
-//        comment.setAuditStatus(auditStatus);
-//        comment.setAuditRemark(auditRemark);
         return updateById(comment) ? Result.success() : Result.failed("审核失败");
     }
 

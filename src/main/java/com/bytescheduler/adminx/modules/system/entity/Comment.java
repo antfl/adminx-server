@@ -26,6 +26,10 @@ public class Comment {
     @TableField(fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
-//    private Integer auditStatus;
-//    private String auditRemark;
+
+    // 可扩展是否审核评论
+    @TableField(exist = false)
+    private Integer auditStatus;
+    @TableField(exist = false)
+    private String auditRemark;
 }
