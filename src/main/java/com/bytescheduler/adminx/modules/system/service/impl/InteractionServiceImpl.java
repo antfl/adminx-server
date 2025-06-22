@@ -3,6 +3,7 @@ package com.bytescheduler.adminx.modules.system.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.system.entity.Interaction;
 import com.bytescheduler.adminx.modules.system.mapper.InteractionMapper;
 import com.bytescheduler.adminx.modules.system.service.ArticleService;
@@ -23,11 +24,14 @@ public class InteractionServiceImpl extends ServiceImpl<InteractionMapper, Inter
     @Override
     @Transactional
     public Result<?> toggleInteraction(Interaction interaction) {
+
+        Long currentUserId = getCurrentUserId();
+
         if (!"like".equals(interaction.getType()) && !"favorite".equals(interaction.getType())) {
             return Result.failed("无效的互动类型");
         }
         LambdaQueryWrapper<Interaction> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Interaction::getUserId, interaction.getUserId())
+        queryWrapper.eq(Interaction::getUserId, currentUserId)
                 .eq(Interaction::getArticleId, interaction.getArticleId())
                 .eq(Interaction::getType, interaction.getType());
 
@@ -49,5 +53,9 @@ public class InteractionServiceImpl extends ServiceImpl<InteractionMapper, Inter
 
     private String getTypeName(String type) {
         return "like".equals(type) ? "点赞" : "收藏";
+    }
+
+    private Long getCurrentUserId() {
+        return UserContext.getCurrentUserId();
     }
 }

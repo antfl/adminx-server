@@ -12,4 +12,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class CommentRequest extends Comment {
     private String userName;
+    private String userAvatar;
+    private Boolean isOwn;
+    private String replyToUserName;
 }

@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class Interaction {
     @TableId(type = IdType.AUTO)
     private Long interactionId;
+    @TableField(fill = FieldFill.INSERT)
     private Long userId;
     private Long articleId;
     private String type;

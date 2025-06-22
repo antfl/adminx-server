@@ -2,9 +2,9 @@ package com.bytescheduler.adminx.modules.system.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.modules.system.dto.CommentCreateRequest;
 import com.bytescheduler.adminx.modules.system.dto.CommentQueryRequest;
-import com.bytescheduler.adminx.modules.system.dto.CommentRequest;
-import com.bytescheduler.adminx.modules.system.entity.Comment;
+import com.bytescheduler.adminx.modules.system.dto.CommentTreeResponse;
 import com.bytescheduler.adminx.modules.system.service.CommentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,8 +24,8 @@ public class CommentController {
 
     @ApiOperation("文章评论（新增或修改）")
     @PostMapping("/save")
-    public Result<?> saveComment(@RequestBody Comment comment) {
-        return commentService.saveOrUpdate(comment) ?
+    public Result<?> saveComment(@RequestBody CommentCreateRequest request) {
+        return commentService.saveComment(request) ?
                 Result.success() : Result.failed("保存失败");
     }
 
@@ -46,7 +46,7 @@ public class CommentController {
 
     @ApiOperation("文章评论分页查询")
     @GetMapping("/page")
-    public Result<Page<CommentRequest>> getCommentPage(CommentQueryRequest queryRequest) {
+    public Result<Page<CommentTreeResponse>> getCommentPage(CommentQueryRequest queryRequest) {
         return commentService.getCommentPage(queryRequest);
     }
 }
