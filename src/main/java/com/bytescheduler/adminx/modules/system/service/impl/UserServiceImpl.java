@@ -2,6 +2,10 @@ package com.bytescheduler.adminx.modules.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.modules.system.dto.UserInfoResponse;
 import com.bytescheduler.adminx.modules.system.dto.UserQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.UserResponse;
 import com.bytescheduler.adminx.modules.system.entity.User;
@@ -12,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends ServiceImpl<SysUserMapper, User> implements UserService {
 
     private final SysUserMapper sysUserMapper;
 
@@ -38,5 +42,21 @@ public class UserServiceImpl implements UserService {
             response.setGender(user.getGender());
             return response;
         });
+    }
+
+    @Override
+    public Result<UserInfoResponse> getUserInfo() {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUserId, getCurrentUserId());
+        User user = sysUserMapper.selectOne(wrapper);
+        UserInfoResponse response = new UserInfoResponse();
+        response.setUserId(user.getUserId());
+        response.setUsername(user.getUsername());
+        response.setAvatar(user.getAvatar());
+        return Result.success(response);
+    }
+
+    private Long getCurrentUserId() {
+        return UserContext.getCurrentUserId();
     }
 }

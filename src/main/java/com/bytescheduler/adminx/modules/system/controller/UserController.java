@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.annotation.Log;
 import com.bytescheduler.adminx.common.domain.Result;
 import com.bytescheduler.adminx.enums.OperationType;
+import com.bytescheduler.adminx.modules.system.dto.UserInfoResponse;
 import com.bytescheduler.adminx.modules.system.dto.UserQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.UserResponse;
 import com.bytescheduler.adminx.modules.system.service.UserService;
@@ -26,5 +27,11 @@ public class UserController {
     @GetMapping("/listUser")
     public Result<Page<UserResponse>> listUser(UserQueryRequest queryRequest) {
         return Result.success(userService.listUser(queryRequest));
+    }
+
+    @ApiOperation("获取用户信息")
+    @GetMapping("/getUserInfo")
+    public Result<UserInfoResponse> getUserInfo() {
+        return  userService.getUserInfo();
     }
 }
