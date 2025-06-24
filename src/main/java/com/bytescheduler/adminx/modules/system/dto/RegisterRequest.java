@@ -13,13 +13,14 @@ import javax.validation.constraints.Size;
  */
 @Data
 public class RegisterRequest {
-    @NotBlank(message = "Username cannot be blank")
-    @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
-    private String username;
+    @NotBlank(message = "用户名必填")
+    @Size(min = 2, max = 20, message = "用户名 2 到 20 个字符")
+    private String nickname;
 
-    @NotBlank(message = "Password cannot be blank")
+    @NotBlank(message = "密码必填")
     private String password;
 
-    @Email(message = "Email should be valid")
+    @NotBlank(message = "邮箱必填")
+    @Email(message = "请输入有效邮箱")
     private String email;
 }

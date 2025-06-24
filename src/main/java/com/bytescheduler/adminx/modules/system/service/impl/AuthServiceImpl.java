@@ -35,31 +35,40 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void register(RegisterRequest request) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", request.getUsername());
+        queryWrapper.eq("email", request.getEmail());
         if (userMapper.selectCount(queryWrapper) > 0) {
             throw new BusinessException("用户名已存在");
         }
 
         User user = new User();
+        user.setUsername(request.getEmail());
         BeanUtils.copyProperties(request, user);
-        user.setNickname(request.getUsername());
+        user.setNickname(request.getNickname());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setAvatar("https://default-avatar-url.png");
+        user.setAvatar("");
 
         userMapper.insert(user);
     }
 
     @Override
     public TokenResponse login(LoginRequest request) {
-        String username = request.getUsername();
-
+        String identifier = request.getUsername().trim();
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", request.getUsername());
+        queryWrapper.and(wrapper -> wrapper
+                .eq("username", identifier)
+                .or()
+                .eq("email", identifier)
+        );
         User user = userMapper.selectOne(queryWrapper);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
 
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BusinessException("密码错误");
+        }
+
+        String username = user.getUsername();
         String token = jwtTokenUtil.generateToken(username, user.getUserId());
 
         redisTemplate.opsForValue().set(
