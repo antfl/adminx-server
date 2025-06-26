@@ -1,0 +1,66 @@
+name: 💡 需求建议
+description: 一个新功能或改进。
+title: "[Feature]: "
+labels: ["✨ feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您的建议！为了让我们更好地理解您的功能请求，请提供以下详细信息。
+
+        - 请将您的问题标题格式化为：`[Feature]：xxx 简短描述`
+        - 在提交之前，请检查是否已存在类似的功能请求
+        - 清晰地描述您的使用场景，以便我们了解其价值
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: 功能类型
+      description: 您希望添加或改进什么类型的功能？
+      options:
+        - 新的 API 端点
+        - 功能改进
+        - 数据库/数据模型变更
+        - 性能优化
+        - 安全加固
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题
+      description: 此功能将为您解决什么问题？
+      placeholder: 请清楚地描述您的需求。
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 提议的解决方案
+      description: 您对于解决问题或改进有什么想法？
+      placeholder: 描述您建议的解决方案或改进。例如，可以提供 API 设计、数据库表结构变更等。
+    validations:
+      required: true
+  
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 补充信息 (可选)
+      description: 在这里添加任何其他关于功能请求的上下文信息。
+      placeholder: 您可以在此处提供 API 契约、伪代码或流程图等。
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 核对清单
+      description: 在提交问题之前，请确保您已完成以下操作。
+      options:
+        - label: 我已经检查过，没有重复的需求 issue。
+          required: true
+        - label: 我已经提供了清晰的问题描述。
+          required: true
+        - label: 如果适用，我已经考虑了对后端API、数据库或用户权限的影响。
+          required: false
