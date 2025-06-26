@@ -1,5 +1,6 @@
 package com.bytescheduler.adminx.modules.system.service;
 
+import com.bytescheduler.adminx.modules.system.dto.CaptchaResponse;
 import com.bytescheduler.adminx.modules.system.dto.LoginRequest;
 import com.bytescheduler.adminx.modules.system.dto.RegisterRequest;
 import com.bytescheduler.adminx.modules.system.dto.TokenResponse;
@@ -13,4 +14,6 @@ public interface AuthService {
     void register(RegisterRequest request);
 
     TokenResponse login(LoginRequest request);
+
+    CaptchaResponse generateCaptcha();
 }
