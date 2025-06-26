@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.modules.system.entity.SysDict;
 import com.bytescheduler.adminx.modules.system.entity.SysDictItem;
 import com.bytescheduler.adminx.modules.system.service.SysDictItemService;
@@ -96,8 +97,8 @@ public class DictController {
 
         Page<SysDict> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<SysDict> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.isNotBlank(dictName), SysDict::getDictName, dictName)
-                .like(StringUtils.isNotBlank(dictCode), SysDict::getDictCode, dictCode)
+        wrapper.like(StringUtils.isNotBlank(dictName), SysDict::getDictName, SqlEscapeUtil.escapeLike(dictName))
+                .like(StringUtils.isNotBlank(dictCode), SysDict::getDictCode, SqlEscapeUtil.escapeLike(dictCode))
                 .orderByDesc(SysDict::getCreateTime);
 
         return Result.success(dictService.page(page, wrapper));
@@ -114,7 +115,7 @@ public class DictController {
         Page<SysDictItem> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<SysDictItem> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(dictId != null, SysDictItem::getDictId, dictId)
-                .like(StringUtils.isNotBlank(itemLabel), SysDictItem::getItemLabel, itemLabel)
+                .like(StringUtils.isNotBlank(itemLabel), SysDictItem::getItemLabel, SqlEscapeUtil.escapeLike(itemLabel))
                 .orderByAsc(SysDictItem::getSort);
 
         return Result.success(dictItemService.page(page, wrapper));

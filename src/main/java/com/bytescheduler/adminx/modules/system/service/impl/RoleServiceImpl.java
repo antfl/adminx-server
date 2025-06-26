@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.domain.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
+import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.modules.system.dto.RolePermissionsRequest;
 import com.bytescheduler.adminx.modules.system.dto.RoleRequest;
 import com.bytescheduler.adminx.modules.system.dto.RoleQueryRequest;
@@ -50,9 +51,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, SysRole> implements
 
         wrapper.eq(SysRole::getIsDeleted, 0)
                 .like(StringUtils.isNotBlank(queryRequest.getRoleName()),
-                        SysRole::getRoleName, queryRequest.getRoleName())
+                        SysRole::getRoleName, SqlEscapeUtil.escapeLike(queryRequest.getRoleName()))
                 .like(StringUtils.isNotBlank(queryRequest.getRoleKey()),
-                        SysRole::getRoleKey, queryRequest.getRoleKey())
+                        SysRole::getRoleKey, SqlEscapeUtil.escapeLike(queryRequest.getRoleKey()))
                 .eq(queryRequest.getStatus() != null,
                         SysRole::getStatus, queryRequest.getStatus());
 

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.domain.Result;
+import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.system.dto.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.system.dto.ArticleQueryRequest;
@@ -32,7 +33,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
 
         if (StringUtils.isNotBlank(queryRequest.getTitle())) {
-            queryWrapper.like("title", queryRequest.getTitle());
+            queryWrapper.like("title", SqlEscapeUtil.escapeLike(queryRequest.getTitle()));
         }
         if (queryRequest.getCategoryId() != null) {
             queryWrapper.eq("a.category_id", queryRequest.getCategoryId());
