@@ -63,3 +63,11 @@ logging:
     org.springframework.security: debug
   file:
     name: logs/app.log
+
+# 验证码配置
+captcha:
+  width: 160
+  height: 60
+  code-count: 6 # 验证码位数
+  interference-count: 20 # 影响线，越高越复杂
+  expire-seconds: 60 # 过期时间 秒

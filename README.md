@@ -15,4 +15,9 @@
 | `@throws`     | 异常说明	   | `@throws IllegalArgumentException` |
 | `@apiNote`    | 额外说明	   | `@apiNote 仅限管理员使用`                 |
 
+# build
+```shell
+# build
+mvn clean package -Dmaven.test.skip=true
+```
 ![img.png](md/img.png)

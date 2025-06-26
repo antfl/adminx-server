@@ -6,10 +6,7 @@ import com.bytescheduler.adminx.enums.OperationType;
 import com.bytescheduler.adminx.modules.system.dto.*;
 import com.bytescheduler.adminx.modules.system.service.AuthService;
 import io.swagger.annotations.Api;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -18,6 +15,7 @@ import javax.validation.Valid;
 @Api(tags = "权限控制")
 public class UserAuthController {
     private final AuthService authService;
+//    private final CaptchaService captchaService;
 
     public UserAuthController(AuthService authService) {
         this.authService = authService;
@@ -33,6 +31,11 @@ public class UserAuthController {
     @PostMapping("/login")
     public Result<TokenResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         return Result.success(authService.login(loginRequest));
+    }
+
+    @GetMapping("/captcha")
+    public Result<CaptchaResponse> getCaptcha() {
+        return Result.success(authService.generateCaptcha());
     }
 
 }

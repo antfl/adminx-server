@@ -1,8 +1,11 @@
 package com.bytescheduler.adminx.modules.system.service.impl;
 
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.LineCaptcha;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.JwtTokenUtil;
+import com.bytescheduler.adminx.modules.system.dto.CaptchaResponse;
 import com.bytescheduler.adminx.modules.system.dto.LoginRequest;
 import com.bytescheduler.adminx.modules.system.dto.RegisterRequest;
 import com.bytescheduler.adminx.modules.system.dto.TokenResponse;
@@ -15,7 +18,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.bytescheduler.adminx.security.config.CaptchaConfig;
 
+import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final RedisTemplate<String, String> redisTemplate;
+    private final CaptchaConfig captchaConfig;
 
     @Override
     @Transactional
@@ -79,5 +86,34 @@ public class AuthServiceImpl implements AuthService {
         );
 
         return new TokenResponse(token);
+    }
+
+
+    @Override
+    public CaptchaResponse generateCaptcha() {
+        // 生成验证码（宽、高、字符数、干扰线数）
+        LineCaptcha captcha = CaptchaUtil.createLineCaptcha(
+                captchaConfig.getWidth(),
+                captchaConfig.getHeight(),
+                captchaConfig.getCodeCount(),
+                captchaConfig.getInterferenceCount()
+        );
+
+        // 验证码文本
+        String code = captcha.getCode();
+
+        // 验证码唯一 ID
+        String captchaId = UUID.randomUUID().toString();
+
+        // 存入 Redis（60 秒过期）
+        redisTemplate.opsForValue().set(
+                "captcha:" + captchaId,
+                code,
+                Duration.ofSeconds(captchaConfig.getExpireSeconds())
+        );
+
+        // 返回 Base64 图片 + ID
+        String base64 = captcha.getImageBase64Data();
+        return new CaptchaResponse(captchaId, base64);
     }
 }
