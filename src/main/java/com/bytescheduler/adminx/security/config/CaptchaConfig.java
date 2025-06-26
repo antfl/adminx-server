@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "captcha")
 public class CaptchaConfig {
+    private String keyHead;
     private int width;
     private int height;
     private int codeCount;
     private int interferenceCount;
     private int expireSeconds;
+    private boolean ignoreCase;
 
 }
