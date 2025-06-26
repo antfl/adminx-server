@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.domain.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
+import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.modules.system.dto.ArticleCategoryRequest;
 import com.bytescheduler.adminx.modules.system.entity.ArticleCategory;
 import com.bytescheduler.adminx.modules.system.mapper.ArticleCategoryMapper;
@@ -26,7 +27,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
         LambdaQueryWrapper<ArticleCategory> queryWrapper = new LambdaQueryWrapper<>();
 
         if (StringUtils.isNotBlank(categoryRequest.getKeyword())) {
-            queryWrapper.like(ArticleCategory::getCategoryName, categoryRequest.getKeyword());
+            queryWrapper.like(ArticleCategory::getCategoryName, SqlEscapeUtil.escapeLike(categoryRequest.getKeyword()));
         }
 
         queryWrapper.orderByDesc(ArticleCategory::getCreateTime);
