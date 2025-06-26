@@ -70,4 +70,6 @@ captcha:
   height: 60
   code-count: 6 # 验证码位数
   interference-count: 20 # 影响线，越高越复杂
-  expire-seconds: 60 # 过期时间 秒
+  expire-seconds: 600 # 过期时间 (秒)
+  ignore-case: false # 是否忽略大小写 (默认不忽略)
+  key-head: "captcha:" # 验证码 (key) 的头

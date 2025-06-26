@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bytescheduler.adminx.security.config.CaptchaConfig;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -60,12 +61,31 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenResponse login(LoginRequest request) {
         String identifier = request.getUsername().trim();
+        String captchaId = captchaConfig.getKeyHead() + request.getCaptchaId();
+        String code;
+        String rds_code;
+
+        //  获取验证码
+        if (captchaConfig.isIgnoreCase()){
+            code = request.getCode().toLowerCase();
+            rds_code = Objects.requireNonNull(redisTemplate.opsForValue().get(captchaId)).toLowerCase();
+        }else {
+            code = request.getCode();
+            rds_code = redisTemplate.opsForValue().get(captchaId);
+        }
+
+        redisTemplate.delete(captchaId);
+        if (!Objects.equals(rds_code, code) || Objects.isNull(rds_code)) {
+            throw new BusinessException("验证码错误");
+        }
+
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.and(wrapper -> wrapper
                 .eq("username", identifier)
                 .or()
                 .eq("email", identifier)
         );
+
         User user = userMapper.selectOne(queryWrapper);
         if (user == null) {
             throw new BusinessException("用户不存在");
@@ -107,7 +127,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 存入 Redis（60 秒过期）
         redisTemplate.opsForValue().set(
-                "captcha:" + captchaId,
+                captchaConfig.getKeyHead() + captchaId,
                 code,
                 Duration.ofSeconds(captchaConfig.getExpireSeconds())
         );
