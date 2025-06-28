@@ -1,9 +1,6 @@
 package com.bytescheduler.adminx.modules.system.service;
 
-import com.bytescheduler.adminx.modules.system.dto.CaptchaResponse;
-import com.bytescheduler.adminx.modules.system.dto.LoginRequest;
-import com.bytescheduler.adminx.modules.system.dto.RegisterRequest;
-import com.bytescheduler.adminx.modules.system.dto.TokenResponse;
+import com.bytescheduler.adminx.modules.system.dto.*;
 
 /**
  * @author byte-scheduler
@@ -16,4 +13,6 @@ public interface AuthService {
     TokenResponse login(LoginRequest request);
 
     CaptchaResponse generateCaptcha();
+
+    MailCodeResponse generateMailCode(String email);
 }
