@@ -2,15 +2,15 @@ package com.bytescheduler.adminx.modules.system.controller;
 
 import com.bytescheduler.adminx.annotation.Log;
 import com.bytescheduler.adminx.common.domain.Result;
-import com.bytescheduler.adminx.common.utils.EmailVerificationService;
 import com.bytescheduler.adminx.enums.OperationType;
 import com.bytescheduler.adminx.modules.system.dto.*;
 import com.bytescheduler.adminx.modules.system.service.AuthService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/auth")
@@ -39,10 +39,14 @@ public class UserAuthController {
         return Result.success(authService.generateCaptcha());
     }
 
-    @ApiOperation("发送验证码")
-    @GetMapping("/sendVerificationCodes/{email}")
-    public Result<CaptchaResponse> sendVerificationCodes(@Valid @PathVariable String email) {
-        boolean result = EmailVerificationService.sendVerificationEmail(email);
-        return result ? Result.success() : Result.failed();
+    @GetMapping("/sendMailCode")
+    public Result<MailCodeResponse> getMailCaptcha(
+            @Valid
+            @RequestParam
+            @NotBlank(message = "邮箱不能为空")
+            @Email(message = "邮箱各式错误")
+            String mail){
+        return Result.success(authService.generateMailCode(mail));
     }
+
 }

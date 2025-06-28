@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 /**
@@ -23,4 +24,12 @@ public class RegisterRequest {
     @NotBlank(message = "邮箱必填")
     @Email(message = "请输入有效邮箱")
     private String email;
+
+    @Pattern(
+            regexp = "^$|^[a-fA-F0-9\\-]{36}$",
+            message = "captchaId must be empty or a valid 36-character UUID"
+    )
+    private String captchaId;
+
+    private String code;
 }

@@ -30,6 +30,25 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  mail:
+    host: smtp.qq.com # 你的smtp服务器
+    port: 465 # 端口
+    username: xxxxxxxxx@qq.com # 发送验证码的邮箱
+    password: xxxxxxxxxx # smtp授权码
+    properties:
+      mail.smtp.ssl.enable: true # 是否开启 ssl 加密
+
+
+# mail 验证开关
+email:
+  verification-enabled: true # true 开启邮箱验证，false 关闭邮箱验证
+  subject: "注册验证码" # 邮件主题
+  content-template: "您的验证码是: %s ，请在5分钟内使用" # 注意！！！，这里的 %s 为code占位符，必须存在
+  code-count: 6 # 验证码位数
+  expire-seconds: 300 # 过期时间 (秒)
+  ignore-case: false # 是否忽略大小写 (默认不忽略)
+  key-head: "mail_captcha:" # 验证码 (key) 的头
+  team-name: "adminX团队 <%s>" # 发送邮件时显示名称,注意！！！，这里的 %s 为code占位符，必须存在
 
 # MyBatisPlus 配置
 mybatis-plus:
@@ -70,6 +89,6 @@ captcha:
   height: 60
   code-count: 6 # 验证码位数
   interference-count: 20 # 影响线，越高越复杂
-  expire-seconds: 600 # 过期时间 (秒)
+  expire-seconds: 60 # 过期时间 (秒)
   ignore-case: false # 是否忽略大小写 (默认不忽略)
   key-head: "captcha:" # 验证码 (key) 的头
