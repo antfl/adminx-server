@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 /**
  * @author byte-scheduler
  * @since 2025/6/21
@@ -87,6 +89,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public ArticleDetailResponse getArticleDetailById(Long id) {
         Long currentUserId = getCurrentUserId();
         return articleMapper.selectArticleDetailById(id, currentUserId);
+    }
+
+    @Override
+    public Result<?> deleteArticle(Long id) {
+        Article article = this.getById(id);
+
+        if (!Objects.equals(article.getUserId(), this.getCurrentUserId())) {
+            return Result.failed("无该操作权限");
+        }
+
+        return this.removeById(id) ?
+                Result.success() : Result.failed("删除失败");
     }
 
     private Long getCurrentUserId() {

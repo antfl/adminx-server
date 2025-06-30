@@ -2,6 +2,7 @@ package com.bytescheduler.adminx.modules.system.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.Result;
+import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.system.entity.SysDict;
 import com.bytescheduler.adminx.modules.system.entity.SysDictItem;
 import com.bytescheduler.adminx.modules.system.mapper.SysDictItemMapper;
@@ -11,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author byte-scheduler
@@ -29,5 +31,20 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
         }
         List<SysDictItem> items = dictItemMapper.selectByDictId(dict.getId());
         return Result.success(items);
+    }
+
+    @Override
+    public Result<Void> deleteDict(Long id) {
+        SysDict sysDict = this.getById(id);
+
+        if (!Objects.equals(sysDict.getUserId(), this.getCurrentUserId())) {
+            return Result.failed("无该操作权限");
+        }
+        return this.removeById(id) ?
+                Result.success() : Result.failed("删除失败");
+    }
+
+    private Long getCurrentUserId() {
+        return UserContext.getCurrentUserId();
     }
 }

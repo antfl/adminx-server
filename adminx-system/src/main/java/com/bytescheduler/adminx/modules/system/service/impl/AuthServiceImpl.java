@@ -47,23 +47,22 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void register(RegisterRequest request) {
+        String email = request.getEmail();
+        String captchaId = email +  emailConfig.getKeyHead() + request.getCaptchaId();
+
         //  判断是否走邮箱验证
         if (emailConfig.isVerificationEnabled()){
-            String email = request.getEmail();
-            String captchaId = email +  emailConfig.getKeyHead() + request.getCaptchaId();
             String rds_code = redisTemplate.opsForValue().get(captchaId);
             String code = request.getCode();
 
             if (emailConfig.isIgnoreCase()) {
                 // 忽略大小写比较
                 if (rds_code == null || !rds_code.equalsIgnoreCase(code)) {
-                    redisTemplate.delete(captchaId);
                     throw new BusinessException("验证码错误");
                 }
             } else {
                 // 严格区分大小写
                 if (rds_code == null || !rds_code.equals(code)) {
-                    redisTemplate.delete(captchaId);
                     throw new BusinessException("验证码错误");
                 }
             }
@@ -82,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
         user.setNickname(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAvatar("");
-
+        redisTemplate.delete(captchaId);
         userMapper.insert(user);
     }
 
@@ -106,7 +105,6 @@ public class AuthServiceImpl implements AuthService {
             rds_code = rds_code.toLowerCase();
         }
 
-        redisTemplate.delete(captchaId);
         if (!Objects.equals(rds_code, code)) {
             throw new BusinessException("验证码错误");
         }
@@ -126,6 +124,8 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BusinessException("密码错误");
         }
+
+        redisTemplate.delete(captchaId);
 
         String username = user.getUsername();
         String token = jwtTokenUtil.generateToken(username, user.getUserId());
@@ -179,7 +179,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 存入 Redis（300 秒过期）
         redisTemplate.opsForValue().set(
-                email + emailConfig.getKeyHead() + captchaId, // 拼接email保证接收地址和使用地址相同
+                email + emailConfig.getKeyHead() + captchaId, // 拼接 email 保证接收地址和使用地址相同
                 code,
                 Duration.ofSeconds(emailConfig.getExpireSeconds())
         );

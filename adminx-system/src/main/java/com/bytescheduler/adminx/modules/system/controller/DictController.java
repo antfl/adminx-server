@@ -74,17 +74,15 @@ public class DictController {
     }
 
     @DeleteMapping("/deleteDict/{id}")
-    @ApiOperation("删除字典")
+    @ApiOperation("删除字典类型")
     public Result<Void> deleteDict(@PathVariable Long id) {
-        return dictService.removeById(id) ?
-                Result.success() : Result.failed("删除失败");
+        return dictService.deleteDict(id);
     }
 
     @DeleteMapping("/deleteDictData/{id}")
-    @ApiOperation("删除字典")
+    @ApiOperation("删除字典值")
     public Result<Void> deleteDictData(@PathVariable Long id) {
-        return dictItemService.removeById(id) ?
-                Result.success() : Result.failed("删除失败");
+        return dictItemService.deleteDictData(id);
     }
 
     @GetMapping("/page")

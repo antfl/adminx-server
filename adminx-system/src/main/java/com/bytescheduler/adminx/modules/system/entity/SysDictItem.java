@@ -31,6 +31,9 @@ public class SysDictItem {
     @ApiModelProperty(value = "排序")
     private Integer sort;
 
+    @TableField(fill = FieldFill.INSERT)
+    private Long userId;
+
     @ApiModelProperty(value = "状态")
     private Integer status;
 

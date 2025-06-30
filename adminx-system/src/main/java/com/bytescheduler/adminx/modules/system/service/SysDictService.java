@@ -13,4 +13,6 @@ import java.util.List;
  */
 public interface SysDictService extends IService<SysDict> {
     Result<List<SysDictItem>> getDictItemsByCode(String dictCode);
+
+    Result<Void> deleteDict(Long id);
 }

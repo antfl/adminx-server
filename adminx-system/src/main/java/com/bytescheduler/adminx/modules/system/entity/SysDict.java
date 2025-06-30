@@ -25,6 +25,9 @@ public class SysDict {
     @ApiModelProperty(value = "字典编码", required = true)
     private String dictCode;
 
+    @TableField(fill = FieldFill.INSERT)
+    private Long userId;
+
     @ApiModelProperty(value = "备注")
     private String remark;
 

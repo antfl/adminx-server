@@ -33,8 +33,7 @@ public class ArticleController {
     @ApiOperation("删除文章")
     @DeleteMapping("del/{id}")
     public Result<?> deleteArticle(@PathVariable Long id) {
-        return articleService.removeById(id) ?
-                Result.success() : Result.failed("删除失败");
+        return articleService.deleteArticle(id);
     }
 
     @ApiOperation("文章详情")

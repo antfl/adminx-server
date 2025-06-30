@@ -45,7 +45,7 @@ email:
   content-template: "您的验证码是: %s，请在 5 分钟内使用"
   code-count: 6 # 验证码位数
   expire-seconds: 300 # 过期时间 (秒)
-  ignore-case: false # 是否忽略大小写 (默认不忽略)
+  ignore-case: true # 是否忽略大小写 (默认不忽略)
   key-head: "mail_captcha:" # 验证码 (key) 的头
   team-name: "Admin x <%s>" # 邮件标题
 
@@ -89,5 +89,5 @@ captcha:
   code-count: 6 # 验证码位数
   interference-count: 20 # 影响线，越高越复杂
   expire-seconds: 60 # 过期时间 (秒)
-  ignore-case: false # 是否忽略大小写 (默认不忽略)
+  ignore-case: true # 是否忽略大小写 (默认不忽略)
   key-head: "captcha:" # 验证码 (key) 的头

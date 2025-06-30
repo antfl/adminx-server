@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 /**
  * @author byte-scheduler
@@ -13,6 +14,12 @@ import javax.validation.constraints.Pattern;
 @Data
 public class RegisterRequest {
     @NotBlank(message = "密码必填")
+    @Size(min = 6, message = "密码长度至少为6位")
+    @Size(max = 32, message = "密码长度大于了32位")
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).+$",
+            message = "密码必须包含小写字母、大写字母、数字和特殊符号"
+    )
     private String password;
 
     @NotBlank(message = "邮箱必填")

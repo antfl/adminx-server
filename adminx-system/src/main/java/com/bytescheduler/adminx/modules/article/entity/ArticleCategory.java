@@ -16,9 +16,15 @@ import java.time.LocalDateTime;
 public class ArticleCategory {
     @TableId(type = IdType.AUTO)
     private Long categoryId;
+
     private String categoryName;
+
+    @TableField(fill = FieldFill.INSERT)
+    private Long userId;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 }

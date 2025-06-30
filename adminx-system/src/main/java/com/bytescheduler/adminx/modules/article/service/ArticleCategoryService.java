@@ -12,4 +12,6 @@ import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
  */
 public interface ArticleCategoryService extends IService<ArticleCategory> {
     Result<Page<ArticleCategory>> getCategoryPage(ArticleCategoryRequest categoryRequest);
+
+    Result<?> deleteCategory(Long id);
 }

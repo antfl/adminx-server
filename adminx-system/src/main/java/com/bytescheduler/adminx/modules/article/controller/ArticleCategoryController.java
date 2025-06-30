@@ -1,14 +1,11 @@
 package com.bytescheduler.adminx.modules.article.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryRequest;
-import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
 import com.bytescheduler.adminx.modules.article.service.ArticleCategoryService;
-import com.bytescheduler.adminx.modules.article.service.ArticleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
@@ -26,7 +23,6 @@ import java.util.List;
 @RequestMapping("/article/category")
 public class ArticleCategoryController {
     private final ArticleCategoryService categoryService;
-    private final ArticleService articleService;
 
     @ApiOperation("保存文章分类（新增或修改）")
     @PostMapping("/save")
@@ -42,16 +38,7 @@ public class ArticleCategoryController {
     @ApiOperation("删除文章分类")
     @DeleteMapping("/del/{id}")
     public Result<?> deleteCategory(@PathVariable Long id) {
-        LambdaQueryWrapper<Article> articleQuery = new LambdaQueryWrapper<>();
-        articleQuery.eq(Article::getCategoryId, id);
-        int articleCount = Math.toIntExact(articleService.count(articleQuery));
-
-        if (articleCount > 0) {
-            return Result.failed("该分类下有文章，无法删除");
-        }
-
-        return categoryService.removeById(id) ?
-                Result.success("分类删除成功") : Result.failed("分类删除失败");
+        return categoryService.deleteCategory(id);
     }
 
     @ApiOperation("文章分类详情")

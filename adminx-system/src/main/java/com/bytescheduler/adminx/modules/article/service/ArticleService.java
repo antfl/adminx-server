@@ -24,4 +24,6 @@ public interface ArticleService extends IService<Article> {
     void decrementLikeCount(Long articleId);
 
     ArticleDetailResponse getArticleDetailById(Long id);
+
+    Result<?> deleteArticle(Long id);
 }
