@@ -37,6 +37,7 @@ git push origin feat/my-feature
 git fetch upstream # 从上游仓库拉代码
 git checkout master # 切换到默认分支
 git merge upstream/master # 合并上游代码到本地默认分支
+git push # 推送到远程默认分支
 # 删除本地及远程分支 类型/功能  和创建时的分支名相同
 git branch -D feat/my-feature            # 删除本地分支
 git push origin --delete feat/my-feature # 删除远程分支
