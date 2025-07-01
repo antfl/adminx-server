@@ -1,5 +1,6 @@
 package com.bytescheduler.adminx.repository.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -15,6 +16,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
  * @since 2025/6/7
  */
 @Configuration
+@ConditionalOnProperty(name = "knife4j.enable", havingValue = "true", matchIfMissing = true)
 @EnableSwagger2WebMvc
 public class Knife4jConfig {
 

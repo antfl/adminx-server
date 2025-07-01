@@ -2,6 +2,7 @@ package com.bytescheduler.adminx.repository.config;
 
 import com.bytescheduler.adminx.repository.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
 
+    @Value("${knife4j.enable:true}")
+    private boolean knife4jEnable;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -39,18 +43,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-
                 .authorizeRequests()
-                .antMatchers(
-                        "/auth/**",
-                        "/doc.html",
-                        "/webjars/**",
-                        "/v2/api-docs",
-                        "/swagger-resources/**",
-                        "/api/doc.html",
-                        "/api/webjars/**",
-                        "/error"
-                ).permitAll()
+                .antMatchers("/auth/**", "/error").permitAll();
+
+        if (knife4jEnable) {
+            http.authorizeRequests()
+                    .antMatchers(
+                            "/doc.html",
+                            "/webjars/**",
+                            "/v2/api-docs",
+                            "/swagger-resources/**",
+                            "/api/doc.html",
+                            "/api/webjars/**"
+                    ).permitAll();
+        }
+
+        http.authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
