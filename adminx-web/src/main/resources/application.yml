@@ -63,8 +63,8 @@ jwt:
   token-prefix: "Bearer "
 
 knife4j:
-  enable: true
-  production: false
+  enable: true  # 是否开启接口文档，默认开启
+  production: false # 是否为生产环境，默认否
   setting:
     language: zh-CN
   # 添加上下文路径配置
