@@ -1,15 +1,18 @@
 package com.bytescheduler.adminx.repository.service;
 
-import org.springframework.data.domain.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.bytescheduler.adminx.common.dto.request.LogPageRequest;
+import com.bytescheduler.adminx.common.entity.PageResult;
+import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.entity.OperationLog;
 
 /**
  * @author byte-scheduler
  * @since 2025/6/8
  */
-public interface OperationLogService {
+public interface OperationLogService extends IService<OperationLog> {
 
-    void save(OperationLog log);
+    void saveLog(OperationLog log);
 
-    Page<OperationLog> getLogs(String operator, String module, org.springframework.data.domain.Pageable pageable);
+    Result<PageResult<OperationLog>> pageQuery(LogPageRequest params);
 }

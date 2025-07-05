@@ -1,10 +1,6 @@
 package com.bytescheduler.adminx.modules.article.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.bytescheduler.adminx.modules.article.dto.request.ArticleRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import org.apache.ibatis.annotations.Mapper;
@@ -17,13 +13,6 @@ import org.apache.ibatis.annotations.Select;
  */
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
-
-    @Select("SELECT a.*, c.category_name, u.username AS author_name " +
-            "FROM article a " +
-            "JOIN article_category c ON a.category_id = c.category_id " +
-            "JOIN sys_user u ON a.user_id = u.user_id " +
-            "${ew.customSqlSegment}")
-    Page<ArticleRequest> selectArticlePage(Page<ArticleRequest> page, @Param(Constants.WRAPPER) QueryWrapper<Article> queryWrapper);
 
     @Select("SELECT a.article_id, a.title, a.content, a.create_time, a.status, a.like_count, " +
             "u.user_id, u.nickname, u.avatar, " +

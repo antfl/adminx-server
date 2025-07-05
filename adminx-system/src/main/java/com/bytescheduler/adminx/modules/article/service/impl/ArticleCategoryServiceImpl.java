@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
@@ -14,7 +15,7 @@ import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
 import com.bytescheduler.adminx.modules.article.mapper.ArticleCategoryMapper;
 import com.bytescheduler.adminx.modules.article.service.ArticleCategoryService;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,44 +25,48 @@ import java.util.Objects;
  * @author byte-scheduler
  * @since 2025/6/21
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMapper, ArticleCategory> implements ArticleCategoryService {
 
     private final ArticleService articleService;
 
     @Override
-    public Result<Page<ArticleCategory>> getCategoryPage(ArticleCategoryRequest categoryRequest) {
-        Page<ArticleCategory> page = new Page<>(categoryRequest.getPageNum(), categoryRequest.getPageSize());
-        LambdaQueryWrapper<ArticleCategory> queryWrapper = new LambdaQueryWrapper<>();
-
-        if (StringUtils.isNotBlank(categoryRequest.getKeyword())) {
-            queryWrapper.like(ArticleCategory::getCategoryName, SqlEscapeUtil.escapeLike(categoryRequest.getKeyword()));
+    @Transactional(rollbackFor = Exception.class)
+    public Result<ArticleCategory> saveUpdate(ArticleCategory articleCategory) {
+        if (articleCategory == null) {
+            return Result.failed("分类数据不能为空");
         }
 
-        queryWrapper.orderByDesc(ArticleCategory::getCreateTime);
-        return Result.success(page(page, queryWrapper));
-    }
-
-    @Override
-    @Transactional
-    public boolean saveOrUpdate(ArticleCategory entity) {
         LambdaQueryWrapper<ArticleCategory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ArticleCategory::getCategoryName, entity.getCategoryName());
+        queryWrapper.eq(ArticleCategory::getCategoryName, articleCategory.getCategoryName());
 
-        if (entity.getCategoryId() != null) {
-            queryWrapper.ne(ArticleCategory::getCategoryId, entity.getCategoryId());
+        if (articleCategory.getCategoryId() != null) {
+            queryWrapper.ne(ArticleCategory::getCategoryId, articleCategory.getCategoryId());
         }
 
         if (count(queryWrapper) > 0) {
             throw new BusinessException("分类名称已存在");
         }
 
-        return super.saveOrUpdate(entity);
+        boolean isInsert = articleCategory.getCategoryId() == null;
+
+        if (isInsert) {
+            this.save(articleCategory);
+        } else {
+            if (!Objects.equals(articleCategory.getCreateUser(), UserContext.getCurrentUserId())) {
+                throw new BusinessException("无该操作权限");
+            }
+            this.updateById(articleCategory);
+        }
+
+        ArticleCategory resultEntity = isInsert ? articleCategory : this.getById(articleCategory.getCategoryId());
+        return Result.success(isInsert ? "新增成功" : "修改成功", resultEntity);
     }
 
     @Override
-    public Result<?> deleteCategory(Long id) {
+    @Transactional(rollbackFor = Exception.class)
+    public Result<String> deleteCategory(Long id) {
         LambdaQueryWrapper<Article> articleQuery = new LambdaQueryWrapper<>();
         articleQuery.eq(Article::getCategoryId, id);
         int articleCount = Math.toIntExact(articleService.count(articleQuery));
@@ -71,15 +76,28 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
         }
 
         ArticleCategory category = this.getById(id);
-        if (!Objects.equals(category.getUserId(), this.getCurrentUserId())) {
+        if (!Objects.equals(category.getCreateUser(), UserContext.getCurrentUserId())) {
             return Result.failed("无该操作权限");
         }
 
-        return this.removeById(id) ?
-                Result.success("分类删除成功") : Result.failed("分类删除失败");
+        return this.removeById(id) ? Result.success("删除成功") : Result.failed("删除失败");
     }
 
-    private Long getCurrentUserId() {
-        return UserContext.getCurrentUserId();
+    @Override
+    public Result<PageResult<ArticleCategory>> pageQuery(ArticleCategoryRequest params) {
+        Page<ArticleCategory> page = Page.of(params.getCurrent(), params.getSize());
+        LambdaQueryWrapper<ArticleCategory> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.isNotBlank(params.getCategoryName()), ArticleCategory::getCategoryName, SqlEscapeUtil.escapeLike(params.getCategoryName())
+        ).orderByDesc(ArticleCategory::getCreateTime);
+
+        Page<ArticleCategory> result = this.page(page, wrapper);
+
+        return Result.success(PageResult.<ArticleCategory>builder()
+                .total(result.getTotal())
+                .current(result.getCurrent())
+                .size(result.getSize())
+                .pages(result.getPages())
+                .records(result.getRecords())
+                .build());
     }
 }

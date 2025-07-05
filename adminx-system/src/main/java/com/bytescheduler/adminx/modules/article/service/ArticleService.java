@@ -1,10 +1,9 @@
 package com.bytescheduler.adminx.modules.article.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleQueryRequest;
-import com.bytescheduler.adminx.modules.article.dto.request.ArticleRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 
@@ -13,11 +12,10 @@ import com.bytescheduler.adminx.modules.article.entity.Article;
  * @since 2025/6/21
  */
 public interface ArticleService extends IService<Article> {
-    Result<Page<ArticleRequest>> getArticlePage(ArticleQueryRequest queryRequest);
 
-    Result<?> auditArticle(Long articleId, Integer auditStatus, String auditRemark);
+    Result<Article> saveUpdate(Article article);
 
-    void updateCommentCount(Long articleId);
+    Result<String> deleteArticle(Long id);
 
     void incrementLikeCount(Long articleId);
 
@@ -25,5 +23,5 @@ public interface ArticleService extends IService<Article> {
 
     ArticleDetailResponse getArticleDetailById(Long id);
 
-    Result<?> deleteArticle(Long id);
+    Result<PageResult<Article>> pageQuery(ArticleQueryRequest params);
 }

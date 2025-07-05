@@ -10,7 +10,7 @@ import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.modules.system.dto.request.RolePermissionsRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RoleQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RoleRequest;
-import com.bytescheduler.adminx.modules.system.entity.Menu;
+import com.bytescheduler.adminx.modules.system.entity.SysMenu;
 import com.bytescheduler.adminx.modules.system.entity.SysRole;
 import com.bytescheduler.adminx.modules.system.mapper.MenuMapper;
 import com.bytescheduler.adminx.modules.system.mapper.RoleMapper;
@@ -102,12 +102,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, SysRole> implements
                     role.getRoleKey(), Collections.emptyList(), Collections.emptyList()));
         }
 
-        List<Menu> menus = menuMapper.selectBatchIds(menuIds);
+        List<SysMenu> menus = menuMapper.selectBatchIds(menuIds);
 
-        List<Menu> menuTree = menuService.getMenuTree();
+        List<SysMenu> menuTree = menuService.getMenuTree();
 
         List<Long> permissionKeys = menus.stream()
-                .map(Menu::getId)
+                .map(SysMenu::getId)
                 .distinct()
                 .collect(Collectors.toList());
 

@@ -4,7 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
+/**
+ * 统一结果返回
+ *
+ * @author byte-scheduler
+ * @since 2025/6/8
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

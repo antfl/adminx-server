@@ -1,5 +1,6 @@
 package com.bytescheduler.adminx.common.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -7,6 +8,8 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
+ * 系统操作日志
+ *
  * @author byte-scheduler
  * @since 2025/6/8
  */
@@ -31,10 +34,10 @@ public class OperationLog {
     @Column(nullable = false, length = 200)
     private String description;
 
-    @Column(name = "request_method", length = 10)
+    @TableField("request_method")
     private String requestMethod;
 
-    @Column(name = "operation_time", nullable = false)
+    @TableField("operation_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date operationTime;
 
@@ -53,6 +56,6 @@ public class OperationLog {
     private Integer status = 1;
 
     @Lob
-    @Column(name = "error_msg")
+    @TableField("error_msg")
     private String errorMsg;
 }

@@ -1,7 +1,6 @@
 package com.bytescheduler.adminx.modules.article.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -15,21 +14,48 @@ import java.time.LocalDateTime;
 @Data
 @TableName("comment")
 public class Comment {
+
+    /**
+     * 评论 ID
+     */
     @TableId(type = IdType.AUTO)
     private Long commentId;
+
+    /**
+     * 文章 ID
+     */
     private Long articleId;
-    @TableField(fill = FieldFill.INSERT)
-    private Long userId;
+
+    /**
+     * 评论内容
+     */
     private String content;
+
+    /**
+     * 父评论 ID（0-顶级评论）
+     */
     private Long parentId;
+
+    /**
+     * 被回复的用户 ID
+     */
     private Long replyToUserId;
+
+    /**
+     * 创建人
+     */
     @TableField(fill = FieldFill.INSERT)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Long createUser;
+
+    /**
+     * 创建时间
+     */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
-    // 可扩展是否审核评论
-    @TableField(exist = false)
-    private Integer auditStatus;
-    @TableField(exist = false)
-    private String auditRemark;
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
 }

@@ -19,19 +19,15 @@ public class AutoFillMetaObjectHandler implements MetaObjectHandler {
         this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
         this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
 
-        Long userId = getCurrentUserId();
-        this.strictInsertFill(metaObject, "userId", Long.class, userId);
+        Long userId = UserContext.getCurrentUserId();
+        this.strictInsertFill(metaObject, "createUser", Long.class, userId);
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
         this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
 
-        Long userId = getCurrentUserId();
-        this.strictInsertFill(metaObject, "userId", Long.class, userId);
-    }
-
-    private Long getCurrentUserId() {
-        return UserContext.getCurrentUserId();
+        Long userId = UserContext.getCurrentUserId();
+        this.strictInsertFill(metaObject, "updateUser", Long.class, userId);
     }
 }

@@ -1,21 +1,21 @@
 package com.bytescheduler.adminx.modules.article.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
+import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleQueryRequest;
-import com.bytescheduler.adminx.modules.article.dto.request.ArticleRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.mapper.ArticleMapper;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -23,50 +23,44 @@ import java.util.Objects;
  * @author byte-scheduler
  * @since 2025/6/21
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
     private final ArticleMapper articleMapper;
 
     @Override
-    public Result<Page<ArticleRequest>> getArticlePage(ArticleQueryRequest queryRequest) {
-        Page<ArticleRequest> page = new Page<>(queryRequest.getPageNum(), queryRequest.getPageSize());
-        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
-
-        if (StringUtils.isNotBlank(queryRequest.getTitle())) {
-            queryWrapper.like("title", SqlEscapeUtil.escapeLike(queryRequest.getTitle()));
-        }
-        if (queryRequest.getCategoryId() != null) {
-            queryWrapper.eq("a.category_id", queryRequest.getCategoryId());
-        }
-        if (queryRequest.getAuditStatus() != null) {
-            queryWrapper.eq("a.audit_status", queryRequest.getAuditStatus());
-        }
-        if (queryRequest.getUserId() != null) {
-            queryWrapper.eq("a.user_id", queryRequest.getUserId());
+    public Result<Article> saveUpdate(Article article) {
+        if (article == null) {
+            return Result.failed("文章数据不能为空");
         }
 
-        queryWrapper.orderByDesc("a.create_time");
-        return Result.success(articleMapper.selectArticlePage(page, queryWrapper));
+        boolean isInsert = article.getArticleId() == null;
+
+        if (isInsert) {
+            this.save(article);
+        } else {
+            if (!Objects.equals(article.getCreateUser(), UserContext.getCurrentUserId())) {
+                throw new BusinessException("无该操作权限");
+            }
+            this.updateById(article);
+        }
+
+        Article resultEntity = isInsert ? article : this.getById(article.getArticleId());
+        return Result.success(isInsert ? "新增成功" : "修改成功", resultEntity);
     }
 
     @Override
-    @Transactional
-    public Result<?> auditArticle(Long articleId, Integer auditStatus, String auditRemark) {
-        Article article = new Article();
-        article.setArticleId(articleId);
-        article.setAuditStatus(auditStatus);
-        article.setAuditRemark(auditRemark);
-        return updateById(article) ? Result.success() : Result.failed("审核失败");
-    }
+    public Result<String> deleteArticle(Long id) {
+        Article article = this.getById(id);
 
-    @Override
-    public void updateCommentCount(Long articleId) {
-        lambdaUpdate()
-                .setSql("comment_count = comment_count + 1")
-                .eq(Article::getArticleId, articleId)
-                .update();
+        Long currentUserId = UserContext.getCurrentUserId();
+
+        if (!Objects.equals(article.getCreateUser(), currentUserId)) {
+            return Result.failed("无该操作权限");
+        }
+
+        return this.removeById(id) ? Result.success() : Result.failed("删除失败");
     }
 
     @Override
@@ -87,23 +81,26 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public ArticleDetailResponse getArticleDetailById(Long id) {
-        Long currentUserId = getCurrentUserId();
+        Long currentUserId = UserContext.getCurrentUserId();
         return articleMapper.selectArticleDetailById(id, currentUserId);
     }
 
     @Override
-    public Result<?> deleteArticle(Long id) {
-        Article article = this.getById(id);
+    public Result<PageResult<Article>> pageQuery(ArticleQueryRequest params) {
+        Page<Article> page = Page.of(params.getCurrent(), params.getSize());
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.isNotBlank(params.getTitle()), Article::getTitle, SqlEscapeUtil.escapeLike(params.getTitle()))
+                .eq(params.getCategoryId() != null, Article::getCategoryId, params.getCategoryId())
+                .orderByDesc(Article::getCreateTime);
 
-        if (!Objects.equals(article.getUserId(), this.getCurrentUserId())) {
-            return Result.failed("无该操作权限");
-        }
+        Page<Article> result = this.page(page, wrapper);
 
-        return this.removeById(id) ?
-                Result.success() : Result.failed("删除失败");
-    }
-
-    private Long getCurrentUserId() {
-        return UserContext.getCurrentUserId();
+        return Result.success(PageResult.<Article>builder()
+                .total(result.getTotal())
+                .current(result.getCurrent())
+                .size(result.getSize())
+                .pages(result.getPages())
+                .records(result.getRecords())
+                .build());
     }
 }

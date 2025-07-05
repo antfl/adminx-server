@@ -23,7 +23,6 @@
     <modules>
         <module>adminx-core</module>
         <module>adminx-system</module>
-        <module>adminx-gateway</module>
         <module>adminx-scheduler</module>
         <module>adminx-web</module>
     </modules>

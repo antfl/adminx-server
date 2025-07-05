@@ -120,7 +120,7 @@ public class LogAspect {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         log.setOperator(authentication.getPrincipal().toString());
 
-        logService.save(log);
+        logService.saveLog(log);
     }
 
     private String getIpAddress(HttpServletRequest request) {

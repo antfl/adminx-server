@@ -31,11 +31,19 @@ public class SysDictItem {
     @ApiModelProperty(value = "排序")
     private Integer sort;
 
-    @TableField(fill = FieldFill.INSERT)
-    private Long userId;
-
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "状态（0-停用，1-正常）")
     private Integer status;
+
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
+    @ApiModelProperty(value = "创建人")
+    @TableField(fill = FieldFill.INSERT)
+    private Long createUser;
+
+    @ApiModelProperty(value = "修改人")
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updateUser;
 
     @ApiModelProperty(value = "创建时间")
     @TableField(fill = FieldFill.INSERT)
@@ -44,4 +52,8 @@ public class SysDictItem {
     @ApiModelProperty(value = "更新时间")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+
+    @TableLogic
+    @ApiModelProperty(value = "删除标志（0-未删除，1-已删除）")
+    private Integer isDeleted;
 }

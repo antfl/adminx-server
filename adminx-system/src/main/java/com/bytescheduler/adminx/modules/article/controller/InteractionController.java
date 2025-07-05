@@ -25,7 +25,7 @@ public class InteractionController {
 
     @ApiOperation("切换用户对文章的互动状态（点赞/收藏")
     @PostMapping("/toggle")
-    public Result<?> toggleInteraction(@RequestBody Interaction interaction) {
+    public Result<String> toggleInteraction(@RequestBody Interaction interaction) {
         return interactionService.toggleInteraction(interaction);
     }
 
@@ -35,7 +35,7 @@ public class InteractionController {
             @RequestParam Long userId,
             @RequestParam(required = false) String type) {
         LambdaQueryWrapper<Interaction> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Interaction::getUserId, userId);
+        queryWrapper.eq(Interaction::getCreateUser, userId);
 
         if (StringUtils.isNotBlank(type)) {
             queryWrapper.eq(Interaction::getType, type);

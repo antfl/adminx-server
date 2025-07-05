@@ -8,7 +8,7 @@ import com.bytescheduler.adminx.modules.article.entity.Interaction;
 import com.bytescheduler.adminx.modules.article.mapper.InteractionMapper;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
 import com.bytescheduler.adminx.modules.article.service.InteractionService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,22 +16,22 @@ import org.springframework.transaction.annotation.Transactional;
  * @author byte-scheduler
  * @since 2025/6/21
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class InteractionServiceImpl extends ServiceImpl<InteractionMapper, Interaction> implements InteractionService {
     private final ArticleService articleService;
 
     @Override
     @Transactional
-    public Result<?> toggleInteraction(Interaction interaction) {
+    public Result<String> toggleInteraction(Interaction interaction) {
 
-        Long currentUserId = getCurrentUserId();
+        Long currentUserId = UserContext.getCurrentUserId();
 
         if (!"like".equals(interaction.getType()) && !"favorite".equals(interaction.getType())) {
             return Result.failed("无效的互动类型");
         }
         LambdaQueryWrapper<Interaction> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Interaction::getUserId, currentUserId)
+        queryWrapper.eq(Interaction::getCreateUser, currentUserId)
                 .eq(Interaction::getArticleId, interaction.getArticleId())
                 .eq(Interaction::getType, interaction.getType());
 
@@ -53,9 +53,5 @@ public class InteractionServiceImpl extends ServiceImpl<InteractionMapper, Inter
 
     private String getTypeName(String type) {
         return "like".equals(type) ? "点赞" : "收藏";
-    }
-
-    private Long getCurrentUserId() {
-        return UserContext.getCurrentUserId();
     }
 }

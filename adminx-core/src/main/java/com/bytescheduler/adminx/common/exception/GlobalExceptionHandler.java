@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
 
+/**
+ * 全局异常捕捉
+ *
+ * @author byte-scheduler
+ * @since 2025/6/8
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

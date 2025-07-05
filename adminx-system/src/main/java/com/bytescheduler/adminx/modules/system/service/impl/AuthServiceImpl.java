@@ -11,7 +11,7 @@ import com.bytescheduler.adminx.modules.system.dto.request.RegisterRequest;
 import com.bytescheduler.adminx.modules.system.dto.response.CaptchaResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.MailCodeResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.TokenResponse;
-import com.bytescheduler.adminx.modules.system.entity.User;
+import com.bytescheduler.adminx.modules.system.entity.SysUser;
 import com.bytescheduler.adminx.modules.system.mapper.SysUserMapper;
 import com.bytescheduler.adminx.modules.system.service.AuthService;
 import com.bytescheduler.adminx.repository.config.CaptchaConfig;
@@ -48,10 +48,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void register(RegisterRequest request) {
         String email = request.getEmail();
-        String captchaId = email +  emailConfig.getKeyHead() + request.getCaptchaId();
+        String captchaId = email + emailConfig.getKeyHead() + request.getCaptchaId();
 
         //  判断是否走邮箱验证
-        if (emailConfig.isVerificationEnabled()){
+        if (emailConfig.isVerificationEnabled()) {
             String rds_code = redisTemplate.opsForValue().get(captchaId);
             String code = request.getCode();
 
@@ -69,13 +69,13 @@ public class AuthServiceImpl implements AuthService {
 
         }
 
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("email", request.getEmail());
         if (userMapper.selectCount(queryWrapper) > 0) {
             throw new BusinessException("用户名已存在");
         }
 
-        User user = new User();
+        SysUser user = new SysUser();
         user.setUsername(request.getEmail());
         BeanUtils.copyProperties(request, user);
         user.setNickname(request.getEmail());
@@ -109,14 +109,14 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("验证码错误");
         }
 
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.and(wrapper -> wrapper
                 .eq("username", identifier)
                 .or()
                 .eq("email", identifier)
         );
 
-        User user = userMapper.selectOne(queryWrapper);
+        SysUser user = userMapper.selectOne(queryWrapper);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
@@ -171,19 +171,27 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public MailCodeResponse generateMailCode(String email) {
+        // 如果已经注册的邮箱不发验证码
+        QueryWrapper<SysUser> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("email", email);
+        SysUser sysUser = userMapper.selectOne(userQueryWrapper);
+        if (sysUser != null) {
+            throw new BusinessException("该用户已注册");
+        }
+
         // 生成验证码
         String code = mailUtil.generateComplexCode(emailConfig.getCodeCount());
 
         // 验证码唯一 ID
         String captchaId = UUID.randomUUID().toString();
 
-        // 存入 Redis（300 秒过期）
+        // 存入 Redis
         redisTemplate.opsForValue().set(
-                email + emailConfig.getKeyHead() + captchaId, // 拼接 email 保证接收地址和使用地址相同
+                email + emailConfig.getKeyHead() + captchaId,
                 code,
                 Duration.ofSeconds(emailConfig.getExpireSeconds())
         );
-        mailUtil.sendVerifyCode(email,code);
+        mailUtil.sendVerifyCode(email, code);
 
         // 返回 Code ID
         return new MailCodeResponse(captchaId);

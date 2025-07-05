@@ -1,6 +1,5 @@
 package com.bytescheduler.adminx.common.utils;
 
-
 /**
  * @author gavinhaydy
  */

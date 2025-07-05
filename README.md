@@ -20,4 +20,4 @@
 # build
 mvn clean package -Dmaven.test.skip=true
 ```
-![img.png](docs/img.png)
+![dashboard.png](docs/dashboard.png)

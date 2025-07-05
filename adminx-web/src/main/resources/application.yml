@@ -41,7 +41,7 @@ spring:
 # mail 验证开关
 email:
   verification-enabled: true # true 开启邮箱验证，false 关闭邮箱验证
-  subject: "注册验证码" # 邮件主题
+  subject: "验证码" # 邮件主题
   content-template: "您的验证码是: %s，请在 5 分钟内使用"
   code-count: 6 # 验证码位数
   expire-seconds: 300 # 过期时间 (秒)

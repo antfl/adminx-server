@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.bytescheduler.adminx.modules.article.dto.request.CommentRequest;
+import com.bytescheduler.adminx.modules.article.dto.response.CommentResponse;
 import com.bytescheduler.adminx.modules.article.entity.Comment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -27,8 +27,8 @@ public interface CommentMapper extends BaseMapper<Comment> {
             "ORDER BY " +
             "   CASE WHEN c.parent_id = 0 THEN c.comment_id ELSE c.parent_id END, " +
             "   c.create_time ASC")
-    Page<CommentRequest> selectCommentPage(
-            Page<CommentRequest> page,
+    Page<CommentResponse> selectCommentPage(
+            Page<CommentResponse> page,
             @Param(Constants.WRAPPER) QueryWrapper<Comment> queryWrapper,
             @Param("currentUserId") Long currentUserId
     );

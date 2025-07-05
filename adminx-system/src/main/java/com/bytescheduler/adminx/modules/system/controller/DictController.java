@@ -1,76 +1,44 @@
 package com.bytescheduler.adminx.modules.system.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
-import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
+import com.bytescheduler.adminx.modules.system.dto.request.DictItemPageRequest;
+import com.bytescheduler.adminx.modules.system.dto.request.DictPageRequest;
 import com.bytescheduler.adminx.modules.system.entity.SysDict;
 import com.bytescheduler.adminx.modules.system.entity.SysDictItem;
 import com.bytescheduler.adminx.modules.system.service.SysDictItemService;
 import com.bytescheduler.adminx.modules.system.service.SysDictService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
  * @author byte-scheduler
  * @since 2025/6/18
  */
-@AllArgsConstructor
 @RestController
 @RequestMapping("/dict")
+@RequiredArgsConstructor
 @Api(tags = "字典管理")
 public class DictController {
+
     private final SysDictService dictService;
     private final SysDictItemService dictItemService;
 
-    @PostMapping("/saveDict")
+    @PostMapping("/saveUpdate")
     @ApiOperation("保存字典（新增或修改）")
-    public Result<SysDict> createDict(@RequestBody SysDict dict) {
-        if (dict == null) {
-            return Result.failed("字典数据不能为空");
-        }
-
-        boolean operationResult = dictService.saveOrUpdate(dict);
-
-        if (operationResult) {
-            SysDict savedDict = dictService.getById(dict.getId());
-            return Result.success("保存成功", savedDict);
-        }
-        return Result.failed(dict.getId() != null ? "修改失败" : "新增失败");
+    public Result<SysDict> saveUpdate(@RequestBody SysDict dict) {
+       return dictService.saveUpdate(dict);
     }
 
-    @PostMapping("/saveDictData")
+    @PostMapping("/saveUpdateData")
     @ApiOperation("保存字典数据（新增或修改）")
     public Result<SysDictItem> saveUpdateData(@RequestBody SysDictItem dictItem) {
-        if (dictItem == null) {
-            return Result.failed("字典数据不能为空");
-        }
-
-        boolean operationResult = dictItemService.saveOrUpdate(dictItem);
-
-        if (operationResult) {
-            SysDictItem savedDictItem = dictItemService.getById(dictItem.getId());
-            return Result.success("保存成功", savedDictItem);
-        }
-        return Result.failed(dictItem.getId() != null ? "修改失败" : "新增失败");
-    }
-
-    @GetMapping("/{id}")
-    @ApiOperation("根据ID查询字典")
-    public Result<SysDict> getDictById(@PathVariable Long id) {
-        SysDict dict = dictService.getById(id);
-        return dict != null ? Result.success(dict) : Result.failed("字典不存在");
-    }
-
-    @GetMapping("/code/{dictCode}")
-    @ApiOperation("根据编码查询字典项")
-    public Result<List<SysDictItem>> getItemsByCode(@PathVariable String dictCode) {
-        return dictService.getDictItemsByCode(dictCode);
+        return dictItemService.saveUpdate(dictItem);
     }
 
     @DeleteMapping("/deleteDict/{id}")
@@ -85,37 +53,28 @@ public class DictController {
         return dictItemService.deleteDictData(id);
     }
 
+    @GetMapping("/{id}")
+    @ApiOperation("根据 ID 查询字典")
+    public Result<SysDict> getDictById(@PathVariable Long id) {
+        SysDict dict = dictService.getById(id);
+        return dict != null ? Result.success(dict) : Result.failed("字典不存在");
+    }
+
+    @GetMapping("/code/{dictCode}")
+    @ApiOperation("根据编码查询字典项")
+    public Result<List<SysDictItem>> getItemsByCode(@PathVariable String dictCode) {
+        return dictService.getDictItemsByCode(dictCode);
+    }
+
     @GetMapping("/page")
     @ApiOperation("分页查询字典")
-    public Result<Page<SysDict>> pageDict(
-            @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-            @RequestParam(value = "dictName", required = false) String dictName,
-            @RequestParam(value = "dictCode", required = false) String dictCode) {
-
-        Page<SysDict> page = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<SysDict> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.isNotBlank(dictName), SysDict::getDictName, SqlEscapeUtil.escapeLike(dictName))
-                .like(StringUtils.isNotBlank(dictCode), SysDict::getDictCode, SqlEscapeUtil.escapeLike(dictCode))
-                .orderByDesc(SysDict::getCreateTime);
-
-        return Result.success(dictService.page(page, wrapper));
+    public Result<PageResult<SysDict>> pageDict(@Valid DictPageRequest params) {
+        return dictService.pageQuery(params);
     }
 
     @GetMapping("/pageData")
     @ApiOperation("分页查询字典值")
-    public Result<Page<SysDictItem>> pageDictItem(
-            @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
-            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-            @RequestParam(value = "dictId", required = false) Long dictId,
-            @RequestParam(value = "itemLabel", required = false) String itemLabel) {
-
-        Page<SysDictItem> page = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<SysDictItem> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(dictId != null, SysDictItem::getDictId, dictId)
-                .like(StringUtils.isNotBlank(itemLabel), SysDictItem::getItemLabel, SqlEscapeUtil.escapeLike(itemLabel))
-                .orderByAsc(SysDictItem::getSort);
-
-        return Result.success(dictItemService.page(page, wrapper));
+    public Result<PageResult<SysDictItem>> pageDictData(@Valid DictItemPageRequest params) {
+        return dictItemService.pageQuery(params);
     }
 }

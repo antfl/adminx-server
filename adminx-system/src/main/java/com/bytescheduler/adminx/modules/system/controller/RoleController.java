@@ -25,8 +25,8 @@ import java.util.Arrays;
  */
 @Api(tags = "角色管理")
 @RestController
-@RequestMapping("/system/roles")
 @RequiredArgsConstructor
+@RequestMapping("/roles")
 public class RoleController {
 
     private final RoleService roleService;

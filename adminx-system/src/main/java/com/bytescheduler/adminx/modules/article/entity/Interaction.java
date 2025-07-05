@@ -14,12 +14,37 @@ import java.time.LocalDateTime;
 @Data
 @TableName("interaction")
 public class Interaction {
+    /**
+     * 互动记录 ID
+     */
     @TableId(type = IdType.AUTO)
     private Long interactionId;
-    @TableField(fill = FieldFill.INSERT)
-    private Long userId;
+
+    /**
+     * 互动记录对应的文章 ID
+     */
     private Long articleId;
+
+    /**
+     * 互动分类（LIKE-点赞，FAVORITE-收藏）
+     */
     private String type;
+
+    /**
+     * 创建人
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createUser;
+
+    /**
+     * 创建时间
+     */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime updateTime;
 }

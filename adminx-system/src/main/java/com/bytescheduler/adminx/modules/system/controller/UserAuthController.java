@@ -10,40 +10,46 @@ import com.bytescheduler.adminx.modules.system.dto.response.MailCodeResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.TokenResponse;
 import com.bytescheduler.adminx.modules.system.service.AuthService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/auth")
 @Api(tags = "权限控制")
 public class UserAuthController {
+
     private final AuthService authService;
 
-    public UserAuthController(AuthService authService) {
-        this.authService = authService;
-    }
-
+    @ApiOperation("用户注册")
+    @Log(module = "用户注册", type = OperationType.USER_REGISTER, value = "用户注册")
     @PostMapping("/register")
     public Result<String> register(@Valid @RequestBody RegisterRequest dto) {
         authService.register(dto);
         return Result.success("注册成功");
     }
 
-    @Log(module = "用户登录", type = OperationType.OTHER, value = "用户登录")
+    @ApiOperation("用户登录")
+    @Log(module = "用户登录", type = OperationType.USER_LOGIN, value = "用户登录")
     @PostMapping("/login")
     public Result<TokenResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         return Result.success(authService.login(loginRequest));
     }
 
+    @ApiOperation("获取图片验证码")
+    @Log(module = "获取图片验证码", type = OperationType.OTHER, value = "获取图片验证码")
     @GetMapping("/captcha")
     public Result<CaptchaResponse> getCaptcha() {
         return Result.success(authService.generateCaptcha());
     }
 
+    @ApiOperation("获取邮箱验证码")
+    @Log(module = "获取邮箱验证码", type = OperationType.OTHER, value = "获取邮箱验证码")
     @GetMapping("/sendMailCode/{mail}")
     public Result<MailCodeResponse> getMailCaptcha(@Valid @PathVariable String mail){
         return Result.success(authService.generateMailCode(mail));
     }
-
 }

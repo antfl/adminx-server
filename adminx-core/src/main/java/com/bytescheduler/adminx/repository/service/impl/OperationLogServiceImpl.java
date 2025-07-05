@@ -1,19 +1,25 @@
 package com.bytescheduler.adminx.repository.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bytescheduler.adminx.common.dto.request.LogPageRequest;
 import com.bytescheduler.adminx.common.entity.OperationLog;
+import com.bytescheduler.adminx.common.entity.PageResult;
+import com.bytescheduler.adminx.common.entity.Result;
+import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
+import com.bytescheduler.adminx.repository.mapper.OperationLogMapper;
 import com.bytescheduler.adminx.repository.service.OperationLogRepository;
 import com.bytescheduler.adminx.repository.service.OperationLogService;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 /**
  * @author byte-scheduler
  * @since 2025/6/8
  */
 @Service
-public class OperationLogServiceImpl implements OperationLogService {
+public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, OperationLog> implements  OperationLogService {
 
     private final OperationLogRepository logRepository;
 
@@ -22,19 +28,27 @@ public class OperationLogServiceImpl implements OperationLogService {
     }
 
     @Override
-    public void save(OperationLog log) {
+    public void saveLog(OperationLog log) {
         logRepository.save(log);
     }
 
     @Override
-    public Page<OperationLog> getLogs(String operator, String module, Pageable pageable) {
-        if (StringUtils.hasText(operator) && StringUtils.hasText(module)) {
-            return logRepository.findByOperatorAndModule(operator, module, pageable);
-        } else if (StringUtils.hasText(operator)) {
-            return logRepository.findByOperator(operator, pageable);
-        } else if (StringUtils.hasText(module)) {
-            return logRepository.findByModule(module, pageable);
-        }
-        return logRepository.findAll(pageable);
+    public Result<PageResult<OperationLog>> pageQuery(LogPageRequest params) {
+
+        Page<OperationLog> page = Page.of(params.getCurrent(), params.getSize());
+        LambdaQueryWrapper<OperationLog> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.isNotBlank(params.getOperator()), OperationLog::getOperator, SqlEscapeUtil.escapeLike(params.getOperator()))
+                .eq(params.getModule() != null, OperationLog::getModule, params.getModule()
+                ).orderByDesc(OperationLog::getOperationTime);
+
+        Page<OperationLog> result = this.page(page, wrapper);
+
+        return Result.success(PageResult.<OperationLog>builder()
+                .total(result.getTotal())
+                .current(result.getCurrent())
+                .size(result.getSize())
+                .pages(result.getPages())
+                .records(result.getRecords())
+                .build());
     }
 }

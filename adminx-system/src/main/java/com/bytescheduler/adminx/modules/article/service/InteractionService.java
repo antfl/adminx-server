@@ -9,5 +9,6 @@ import com.bytescheduler.adminx.modules.article.entity.Interaction;
  * @since 2025/6/21
  */
 public interface InteractionService extends IService<Interaction> {
-    Result<?> toggleInteraction(Interaction interaction);
+
+    Result<String> toggleInteraction(Interaction interaction);
 }

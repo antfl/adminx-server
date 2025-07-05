@@ -1,6 +1,6 @@
 package com.bytescheduler.adminx.modules.system.dto.request;
 
-import com.bytescheduler.adminx.modules.system.entity.Menu;
+import com.bytescheduler.adminx.modules.system.entity.SysMenu;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +18,6 @@ public class RolePermissionsRequest {
     private Long roleId;
     private String roleName;
     private String roleKey;
-    private List<Menu> menuTree;
+    private List<SysMenu> menuTree;
     private List<Long> permissionKeys;
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+
 import java.security.SecureRandom;
 
 @Component
@@ -13,8 +14,11 @@ public class MailUtil {
     private final EmailConfig emailConfig;
     private static final SecureRandom random = new SecureRandom();
 
+    /**
+     * 读取 spring.mail.username
+     */
     @Value("${spring.mail.username}")
-    private String from; // 直接读取 spring.mail.username
+    private String from;
 
 
     public MailUtil(JavaMailSender mailSender, EmailConfig emailConfig) {
@@ -30,10 +34,10 @@ public class MailUtil {
      */
     public void sendVerifyCode(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(String.format(emailConfig.getTeamName(),from));
+        message.setFrom(String.format(emailConfig.getTeamName(), from));
         message.setTo(to);
         message.setSubject(emailConfig.getSubject());
-        message.setText(String.format(emailConfig.getContentTemplate(),code));
+        message.setText(String.format(emailConfig.getContentTemplate(), code));
         mailSender.send(message);
     }
 

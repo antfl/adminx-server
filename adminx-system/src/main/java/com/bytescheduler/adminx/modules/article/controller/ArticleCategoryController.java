@@ -1,8 +1,7 @@
 package com.bytescheduler.adminx.modules.article.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
-import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryRequest;
 import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
 import com.bytescheduler.adminx.modules.article.service.ArticleCategoryService;
@@ -11,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -27,17 +27,12 @@ public class ArticleCategoryController {
     @ApiOperation("保存文章分类（新增或修改）")
     @PostMapping("/save")
     public Result<?> saveCategory(@RequestBody ArticleCategory category) {
-        try {
-            return categoryService.saveOrUpdate(category) ?
-                    Result.success("分类保存成功") : Result.failed("分类保存失败");
-        } catch (BusinessException e) {
-            return Result.failed(e.getMessage());
-        }
+        return categoryService.saveUpdate(category);
     }
 
     @ApiOperation("删除文章分类")
     @DeleteMapping("/del/{id}")
-    public Result<?> deleteCategory(@PathVariable Long id) {
+    public Result<String> deleteCategory(@PathVariable Long id) {
         return categoryService.deleteCategory(id);
     }
 
@@ -49,13 +44,13 @@ public class ArticleCategoryController {
 
     @ApiOperation("分页查询文章分类")
     @GetMapping("/page")
-    public Result<Page<ArticleCategory>> getCategoryPage(ArticleCategoryRequest query) {
-        return categoryService.getCategoryPage(query);
+    public Result<PageResult<ArticleCategory>> pageCategory(@Valid ArticleCategoryRequest params) {
+        return categoryService.pageQuery(params);
     }
 
     @ApiOperation("所有文章分类")
-    @GetMapping("/all")
-    public Result<List<ArticleCategory>> getAllCategories() {
+    @GetMapping("/list")
+    public Result<List<ArticleCategory>> listCategory() {
         return Result.success(categoryService.list());
     }
 }

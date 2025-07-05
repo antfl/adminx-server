@@ -1,19 +1,22 @@
 package com.bytescheduler.adminx.modules.article.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
+import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.article.dto.request.CommentCreateRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.CommentQueryRequest;
-import com.bytescheduler.adminx.modules.article.dto.request.CommentRequest;
+import com.bytescheduler.adminx.modules.article.dto.request.CommentUpdateRequest;
+import com.bytescheduler.adminx.modules.article.dto.response.CommentResponse;
 import com.bytescheduler.adminx.modules.article.dto.response.CommentTreeResponse;
 import com.bytescheduler.adminx.modules.article.entity.Comment;
 import com.bytescheduler.adminx.modules.article.mapper.CommentMapper;
-import com.bytescheduler.adminx.modules.article.service.ArticleService;
 import com.bytescheduler.adminx.modules.article.service.CommentService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,28 +26,29 @@ import java.util.*;
  * @author byte-scheduler
  * @since 2025/6/21
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
     private final CommentMapper commentMapper;
-    private final ArticleService articleService;
 
     @Override
-    public boolean saveComment(CommentCreateRequest request) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean saveComment(CommentCreateRequest params) {
         Long currentUserId = getCurrentUserId();
-        Comment comment = new Comment();
-        comment.setArticleId(request.getArticleId());
-        comment.setContent(request.getContent());
-        comment.setParentId(request.getParentId());
-        comment.setUserId(currentUserId);
 
-        if (request.getParentId() != null && request.getParentId() != 0) {
-            if (request.getReplyToUserId() != null) {
-                comment.setReplyToUserId(request.getReplyToUserId());
+        Comment comment = new Comment();
+        comment.setArticleId(params.getArticleId());
+        comment.setContent(params.getContent());
+        comment.setParentId(params.getParentId());
+        comment.setCreateUser(currentUserId);
+
+        if (params.getParentId() != null && params.getParentId() != 0) {
+            if (params.getReplyToUserId() != null) {
+                comment.setReplyToUserId(params.getReplyToUserId());
             } else {
-                Comment parentComment = getById(request.getParentId());
+                Comment parentComment = getById(params.getParentId());
                 if (parentComment != null) {
-                    comment.setReplyToUserId(parentComment.getUserId());
+                    comment.setReplyToUserId(parentComment.getCreateUser());
                 }
             }
         }
@@ -52,39 +56,75 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     }
 
     @Override
-    public Result<Page<CommentTreeResponse>> getCommentPage(CommentQueryRequest queryRequest) {
-        QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
+    public boolean deleteComment(Long id) {
+        if (id == null) {
+            throw new BusinessException("ID 不能为空");
+        }
 
-        if (queryRequest.getArticleId() == null) {
-            return Result.failed("文章 ID 不能为空");
-        }
-        queryWrapper.eq("c.article_id", queryRequest.getArticleId());
+        LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Comment::getCommentId, id);
+        Comment comment = this.getOne(queryWrapper);
 
-        if (queryRequest.getUserId() != null) {
-            queryWrapper.eq("c.user_id", queryRequest.getUserId());
-        }
-        if (queryRequest.getAuditStatus() != null) {
-            queryWrapper.eq("c.audit_status", queryRequest.getAuditStatus());
-        }
-        Page<CommentRequest> pageInfo = new Page<>(queryRequest.getPageNum(), queryRequest.getPageSize());
         Long currentUserId = getCurrentUserId();
-        Page<CommentRequest> resultPage = commentMapper.selectCommentPage(pageInfo, queryWrapper, currentUserId);
-        List<CommentTreeResponse> commentTree = buildCommentTree(resultPage.getRecords());
-        Page<CommentTreeResponse> finalPage = new Page<>(
-                resultPage.getCurrent(),
-                resultPage.getSize(),
-                resultPage.getTotal()
-        );
-        finalPage.setRecords(commentTree);
-        return Result.success(finalPage);
+        if (!Objects.equals(comment.getCreateUser(), currentUserId)) {
+            throw new BusinessException("只允许删除自己的评论");
+        }
+
+        return this.removeById(id);
     }
 
-    private List<CommentTreeResponse> buildCommentTree(List<CommentRequest> flatList) {
+    @Override
+    public boolean updateComment(CommentUpdateRequest params) {
+        if (params.getId() == null) {
+            throw new BusinessException("评论 ID 不能为空");
+        }
+        LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Comment::getCommentId, params.getId());
+        Comment comment = this.getOne(queryWrapper);
+        Long currentUserId = getCurrentUserId();
+
+        if (!Objects.equals(comment.getCreateUser(), currentUserId)) {
+            throw new BusinessException("只允许修改自己的评论");
+        }
+
+        comment.setContent(params.getContent());
+        return updateById(comment);
+    }
+
+    @Override
+    public Result<PageResult<CommentTreeResponse>> pageQuery(CommentQueryRequest params) {
+        QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
+
+        if (params.getArticleId() == null) {
+            return Result.failed("文章 ID 不能为空");
+        }
+        queryWrapper.eq("c.article_id", params.getArticleId());
+
+        Page<CommentResponse> pageInfo = new Page<>(params.getCurrent(), params.getSize());
+
+        Long currentUserId = getCurrentUserId();
+        Page<CommentResponse> result = commentMapper.selectCommentPage(pageInfo, queryWrapper, currentUserId);
+        List<CommentTreeResponse> commentTree = buildCommentTree(result.getRecords());
+
+        return Result.success(PageResult.<CommentTreeResponse>builder()
+                .total(result.getTotal())
+                .current(result.getCurrent())
+                .size(result.getSize())
+                .pages(result.getPages())
+                .records(commentTree)
+                .build());
+    }
+
+    private Long getCurrentUserId() {
+        return UserContext.getCurrentUserId();
+    }
+
+    private List<CommentTreeResponse> buildCommentTree(List<CommentResponse> flatList) {
         Map<Long, CommentTreeResponse> commentMap = new HashMap<>();
         Map<Long, List<CommentTreeResponse>> topLevelRepliesMap = new HashMap<>();
         List<CommentTreeResponse> topLevelComments = new ArrayList<>();
 
-        for (CommentRequest dto : flatList) {
+        for (CommentResponse dto : flatList) {
             CommentTreeResponse vo = convertToTreeData(dto);
             commentMap.put(vo.getId(), vo);
 
@@ -94,7 +134,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             }
         }
 
-        for (CommentRequest dto : flatList) {
+        for (CommentResponse dto : flatList) {
             if (dto.getParentId() != 0) {
                 CommentTreeResponse reply = convertToTreeData(dto);
                 Long rootCommentId = findRootCommentId(dto.getCommentId(), commentMap);
@@ -136,35 +176,11 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         return null;
     }
 
-
-    @Override
-    @Transactional
-    public Result<?> auditComment(Long commentId, Integer auditStatus, String auditRemark) {
-        Comment comment = new Comment();
-        comment.setCommentId(commentId);
-        return updateById(comment) ? Result.success() : Result.failed("审核失败");
-    }
-
-    @Override
-    @Transactional
-    public boolean saveOrUpdate(Comment comment) {
-        boolean result = super.saveOrUpdate(comment);
-
-        if (result && comment.getCommentId() == null) {
-            articleService.updateCommentCount(comment.getArticleId());
-        }
-        return result;
-    }
-
-    private Long getCurrentUserId() {
-        return UserContext.getCurrentUserId();
-    }
-
-    private CommentTreeResponse convertToTreeData(CommentRequest dto) {
+    private CommentTreeResponse convertToTreeData(CommentResponse dto) {
         CommentTreeResponse vo = new CommentTreeResponse();
         vo.setId(dto.getCommentId());
         vo.setArticleId(dto.getArticleId());
-        vo.setUserId(dto.getUserId());
+        vo.setUserId(dto.getCreateUser());
         vo.setContent(dto.getContent());
         vo.setParentId(dto.getParentId());
         vo.setCreateTime(dto.getCreateTime());

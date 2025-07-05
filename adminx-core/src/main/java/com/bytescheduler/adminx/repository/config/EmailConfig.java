@@ -8,13 +8,43 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "email")
 public class EmailConfig {
+    /**
+     * true 开启邮箱验证，false 关闭邮箱验证
+     */
     private boolean verificationEnabled;
-    private String from;
+
+    /**
+     * 邮件主题
+     */
     private String subject;
+
+    /**
+     * 邮件模板
+     */
     private String contentTemplate;
+
+    /**
+     * 验证码位数
+     */
     private int codeCount;
+
+    /**
+     * 过期时间 (秒)
+     */
     private int expireSeconds;
+
+    /**
+     * 是否忽略大小写 (默认不忽略)
+     */
     private boolean ignoreCase;
+
+    /**
+     * 验证码 (key) 的头
+     */
     private String keyHead;
+
+    /**
+     * 邮件标题
+     */
     private String teamName;
 }

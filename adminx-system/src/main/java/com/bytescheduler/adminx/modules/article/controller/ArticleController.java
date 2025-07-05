@@ -1,9 +1,8 @@
 package com.bytescheduler.adminx.modules.article.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleQueryRequest;
-import com.bytescheduler.adminx.modules.article.dto.request.ArticleRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
@@ -25,14 +24,13 @@ public class ArticleController {
 
     @ApiOperation("保存文章（新增或修改）")
     @PostMapping("/save")
-    public Result<?> saveArticle(@RequestBody Article article) {
-        return articleService.saveOrUpdate(article) ?
-                Result.success() : Result.failed("保存失败");
+    public Result<Article> saveArticle(@RequestBody Article article) {
+        return articleService.saveUpdate(article);
     }
 
     @ApiOperation("删除文章")
     @DeleteMapping("del/{id}")
-    public Result<?> deleteArticle(@PathVariable Long id) {
+    public Result<String> deleteArticle(@PathVariable Long id) {
         return articleService.deleteArticle(id);
     }
 
@@ -44,15 +42,7 @@ public class ArticleController {
 
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public Result<Page<ArticleRequest>> getArticlePage(ArticleQueryRequest queryRequest) {
-        return articleService.getArticlePage(queryRequest);
-    }
-
-    @ApiOperation("审核文章")
-    @PostMapping("/audit")
-    public Result<?> auditArticle(@RequestParam Long articleId,
-                                  @RequestParam Integer auditStatus,
-                                  @RequestParam(required = false) String auditRemark) {
-        return articleService.auditArticle(articleId, auditStatus, auditRemark);
+    public Result<PageResult<Article>> pageArticle(ArticleQueryRequest params) {
+        return articleService.pageQuery(params);
     }
 }

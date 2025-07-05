@@ -2,6 +2,12 @@ package com.bytescheduler.adminx.common.exception;
 
 import lombok.Getter;
 
+/**
+ * 全局异常返回
+ *
+ * @author byte-scheduler
+ * @since 2025/6/8
+ */
 @Getter
 public class BusinessException extends RuntimeException {
     private final Integer code;
@@ -17,5 +23,4 @@ public class BusinessException extends RuntimeException {
         super(message);
         this.code = code;
     }
-
 }

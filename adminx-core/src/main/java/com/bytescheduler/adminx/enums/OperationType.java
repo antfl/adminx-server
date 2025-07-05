@@ -13,12 +13,13 @@ public enum OperationType {
     UPDATE("修改"),
     DELETE("删除"),
     SELECT("查询"),
-    OTHER("其他");
+    OTHER("其他"),
+    USER_LOGIN("用户登录"),
+    USER_REGISTER("用户注册");
 
     private final String value;
 
     OperationType(String value) {
         this.value = value;
     }
-
 }

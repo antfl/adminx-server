@@ -1,17 +1,21 @@
 package com.bytescheduler.adminx.modules.article.dto.request;
 
+import com.bytescheduler.adminx.common.entity.PageParams;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author byte-scheduler
  * @since 2025/6/21
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class ArticleQueryRequest {
-    private Integer pageNum = 1;
-    private Integer pageSize = 10;
+public class ArticleQueryRequest extends PageParams {
+
+    @ApiModelProperty(value = "文章标题")
     private String title;
+
+    @ApiModelProperty(value = "文章分类")
     private Long categoryId;
-    private Long userId;
-    private Integer auditStatus;
 }
