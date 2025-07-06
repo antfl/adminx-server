@@ -1,7 +1,6 @@
 package com.bytescheduler.adminx.modules.system.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Entity;
@@ -76,15 +75,27 @@ public class SysUser {
      */
     private Date lastLoginTime;
 
+    /**
+     * 创建人
+     */
     @TableField(fill = FieldFill.INSERT)
     private Long createUser;
 
+    /**
+     * 更新人
+     */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
 
+    /**
+     * 创建时间
+     */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
+    /**
+     * 更新时间
+     */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 

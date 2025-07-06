@@ -27,11 +27,14 @@ public class SysMenu {
     @ApiModelProperty(value = "父级 ID")
     private Long parentId;
 
-    @ApiModelProperty(value = "菜单名")
+    @ApiModelProperty(value = "菜单名（路由名称）")
     private String name;
 
+    @ApiModelProperty(value = "菜单中文名")
+    private String titleZh;
+
     @ApiModelProperty(value = "菜单英文名")
-    private String nameEn;
+    private String titleEn;
 
     @ApiModelProperty(value = "地址")
     private String path;

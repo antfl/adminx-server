@@ -37,6 +37,12 @@ public class Interaction {
     private Long createUser;
 
     /**
+     * 更新人
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updateUser;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

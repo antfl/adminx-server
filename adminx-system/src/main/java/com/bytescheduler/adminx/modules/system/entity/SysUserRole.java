@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * @author byte-scheduler
@@ -29,6 +28,18 @@ public class SysUserRole {
      * 角色 ID
      */
     private Long roleId;
+
+    /**
+     * 创建人
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createUser;
+
+    /**
+     * 更新人
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updateUser;
 
     /**
      * 创建时间

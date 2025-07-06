@@ -31,6 +31,18 @@ public class SysRoleMenu {
     private Long menuId;
 
     /**
+     * 创建人
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createUser;
+
+    /**
+     * 修改人
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updateUser;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
