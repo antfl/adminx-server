@@ -3,6 +3,9 @@ package com.bytescheduler.adminx.modules.article.dto.request;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
 /**
  * @author byte-scheduler
  * @since 2025/6/22
@@ -14,6 +17,8 @@ public class CommentCreateRequest {
     private Long articleId;
 
     @ApiModelProperty(value = "评论内容")
+    @NotBlank(message = "评论内容不能为空")
+    @Size(min = 1, max = 2000, message = "评论内容长度需在1-200位之间")
     private String content;
 
     @ApiModelProperty(value = "评论父 ID")

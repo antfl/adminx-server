@@ -18,7 +18,7 @@ import javax.validation.Valid;
 @Api(tags = "系统日志")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/logs")
+@RequestMapping("/log")
 public class OperationLogController {
 
     private final OperationLogService logService;

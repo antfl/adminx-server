@@ -31,9 +31,11 @@ public class SysMenu {
     private String name;
 
     @ApiModelProperty(value = "菜单中文名")
+    @TableField("title_zh")
     private String titleZh;
 
     @ApiModelProperty(value = "菜单英文名")
+    @TableField("title_eh")
     private String titleEn;
 
     @ApiModelProperty(value = "地址")
@@ -87,8 +89,9 @@ public class SysMenu {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
-    @TableLogic
     @ApiModelProperty(value = "删除标志（0-未删除，1-已删除）")
+    @TableLogic
+    @TableField("is_deleted")
     private Integer isDeleted;
 
     @TableField(exist = false)

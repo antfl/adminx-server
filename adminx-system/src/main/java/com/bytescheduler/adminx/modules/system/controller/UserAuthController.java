@@ -27,8 +27,8 @@ public class UserAuthController {
     @ApiOperation("用户注册")
     @Log(module = "用户注册", type = OperationType.USER_REGISTER, value = "用户注册")
     @PostMapping("/register")
-    public Result<String> register(@Valid @RequestBody RegisterRequest dto) {
-        authService.register(dto);
+    public Result<String> register(@Valid @RequestBody RegisterRequest params) {
+        authService.register(params);
         return Result.success("注册成功");
     }
 
@@ -49,7 +49,7 @@ public class UserAuthController {
     @ApiOperation("获取邮箱验证码")
     @Log(module = "获取邮箱验证码", type = OperationType.OTHER, value = "获取邮箱验证码")
     @GetMapping("/sendMailCode/{mail}")
-    public Result<MailCodeResponse> getMailCaptcha(@Valid @PathVariable String mail){
+    public Result<MailCodeResponse> getMailCaptcha(@Valid @PathVariable String mail) {
         return Result.success(authService.generateMailCode(mail));
     }
 }

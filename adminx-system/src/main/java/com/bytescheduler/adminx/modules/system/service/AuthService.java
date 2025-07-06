@@ -12,9 +12,9 @@ import com.bytescheduler.adminx.modules.system.dto.response.TokenResponse;
  */
 public interface AuthService {
 
-    void register(RegisterRequest request);
+    void register(RegisterRequest params);
 
-    TokenResponse login(LoginRequest request);
+    TokenResponse login(LoginRequest params);
 
     CaptchaResponse generateCaptcha();
 

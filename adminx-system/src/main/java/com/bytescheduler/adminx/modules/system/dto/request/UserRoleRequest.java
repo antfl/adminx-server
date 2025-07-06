@@ -1,5 +1,6 @@
 package com.bytescheduler.adminx.modules.system.dto.request;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
@@ -12,9 +13,12 @@ import java.util.List;
  */
 @Data
 public class UserRoleRequest {
-    @NotNull(message = "用户ID不能为空")
+
+    @ApiModelProperty(value = "用户 ID")
+    @NotNull(message = "用户 ID 不能为空")
     private Long userId;
 
-    @NotEmpty(message = "角色ID列表不能为空")
+    @ApiModelProperty(value = "角色 ID 数组")
+    @NotEmpty(message = "角色 ID 列表不能为空")
     private List<Long> roleIds;
 }

@@ -35,7 +35,7 @@ public class CommentTreeResponse {
     private LocalDateTime createTime;
 
     @ApiModelProperty(value = "评论用户昵称")
-    private String userName;
+    private String nickName;
 
     @ApiModelProperty(value = "评论用户头像")
     private String userAvatar;

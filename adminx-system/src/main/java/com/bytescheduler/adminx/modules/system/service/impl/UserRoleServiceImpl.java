@@ -20,7 +20,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Result<?> setUserRoles(UserRoleRequest dto) {
+    public Result<String> setUserRoles(UserRoleRequest dto) {
         userRoleMapper.deleteByUserId(dto.getUserId());
 
         if (!dto.getRoleIds().isEmpty()) {

@@ -13,7 +13,9 @@ import com.bytescheduler.adminx.modules.article.dto.request.CommentQueryRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.CommentUpdateRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.CommentResponse;
 import com.bytescheduler.adminx.modules.article.dto.response.CommentTreeResponse;
+import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.entity.Comment;
+import com.bytescheduler.adminx.modules.article.mapper.ArticleMapper;
 import com.bytescheduler.adminx.modules.article.mapper.CommentMapper;
 import com.bytescheduler.adminx.modules.article.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -29,18 +31,18 @@ import java.util.*;
 @RequiredArgsConstructor
 @Service
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
+
+    private final ArticleMapper articleMapper;
     private final CommentMapper commentMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean saveComment(CommentCreateRequest params) {
-        Long currentUserId = getCurrentUserId();
 
         Comment comment = new Comment();
         comment.setArticleId(params.getArticleId());
         comment.setContent(params.getContent());
         comment.setParentId(params.getParentId());
-        comment.setCreateUser(currentUserId);
 
         if (params.getParentId() != null && params.getParentId() != 0) {
             if (params.getReplyToUserId() != null) {
@@ -65,7 +67,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         queryWrapper.eq(Comment::getCommentId, id);
         Comment comment = this.getOne(queryWrapper);
 
-        Long currentUserId = getCurrentUserId();
+        Long currentUserId = UserContext.getCurrentUserId();
         if (!Objects.equals(comment.getCreateUser(), currentUserId)) {
             throw new BusinessException("只允许删除自己的评论");
         }
@@ -81,8 +83,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Comment::getCommentId, params.getId());
         Comment comment = this.getOne(queryWrapper);
-        Long currentUserId = getCurrentUserId();
 
+        Long currentUserId = UserContext.getCurrentUserId();
         if (!Objects.equals(comment.getCreateUser(), currentUserId)) {
             throw new BusinessException("只允许修改自己的评论");
         }
@@ -102,8 +104,11 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
         Page<CommentResponse> pageInfo = new Page<>(params.getCurrent(), params.getSize());
 
-        Long currentUserId = getCurrentUserId();
-        Page<CommentResponse> result = commentMapper.selectCommentPage(pageInfo, queryWrapper, currentUserId);
+        LambdaQueryWrapper<Article> articleQueryWrapper = new LambdaQueryWrapper<>();
+        articleQueryWrapper.eq(Article::getArticleId, params.getArticleId());
+        Article article = articleMapper.selectOne(articleQueryWrapper);
+
+        Page<CommentResponse> result = commentMapper.selectCommentPage(pageInfo, queryWrapper, article.getCreateUser());
         List<CommentTreeResponse> commentTree = buildCommentTree(result.getRecords());
 
         return Result.success(PageResult.<CommentTreeResponse>builder()
@@ -113,10 +118,6 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 .pages(result.getPages())
                 .records(commentTree)
                 .build());
-    }
-
-    private Long getCurrentUserId() {
-        return UserContext.getCurrentUserId();
     }
 
     private List<CommentTreeResponse> buildCommentTree(List<CommentResponse> flatList) {
@@ -185,7 +186,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         vo.setParentId(dto.getParentId());
         vo.setCreateTime(dto.getCreateTime());
 
-        vo.setUserName(dto.getUserName());
+        vo.setNickName(dto.getNickName());
         vo.setUserAvatar(dto.getUserAvatar());
         vo.setIsOwn(dto.getIsOwn());
         vo.setReplyTo(dto.getReplyToUserName());

@@ -1,7 +1,7 @@
 package com.bytescheduler.adminx.modules.system.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bytescheduler.adminx.annotation.Log;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.enums.OperationType;
 import com.bytescheduler.adminx.modules.system.dto.request.RoleMenuRequest;
@@ -26,7 +26,7 @@ import java.util.Arrays;
 @Api(tags = "角色管理")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/roles")
+@RequestMapping("/role")
 public class RoleController {
 
     private final RoleService roleService;
@@ -34,9 +34,9 @@ public class RoleController {
 
     @ApiOperation("角色分页查询")
     @Log(module = "角色管理", type = OperationType.SELECT, value = "角色分页查询")
-    @GetMapping
-    public Result<Page<SysRole>> listRoles(RoleQueryRequest queryRequest) {
-        return Result.success(roleService.listRoles(queryRequest));
+    @GetMapping("/page")
+    public Result<PageResult<SysRole>> pageRole(@Valid RoleQueryRequest params) {
+        return roleService.pageQuery(params);
     }
 
     @ApiOperation("角色详情")
@@ -53,38 +53,31 @@ public class RoleController {
     @ApiOperation("创建角色")
     @Log(module = "角色管理", type = OperationType.SELECT, value = "创建角色")
     @PostMapping
-    public Result<String> createRole(@Valid @RequestBody RoleRequest dto) {
-        roleService.createRole(dto);
+    public Result<String> createRole(@Valid @RequestBody RoleRequest params) {
+        roleService.createRole(params);
         return Result.success("创建成功");
     }
 
     @ApiOperation("更新角色")
     @Log(module = "角色管理", type = OperationType.SELECT, value = "更新角色")
     @PutMapping("/{roleId}")
-    public Result<String> updateRole(
-            @PathVariable Long roleId,
-            @Valid @RequestBody RoleRequest dto) {
-        roleService.updateRole(roleId, dto);
+    public Result<String> updateRole(@PathVariable Long roleId, @Valid @RequestBody RoleRequest params) {
+        roleService.updateRole(roleId, params);
         return Result.success("更新成功");
     }
 
     @ApiOperation("删除角色")
     @Log(module = "角色管理", type = OperationType.SELECT, value = "删除角色")
-    @DeleteMapping("/{roleId}")
+    @DeleteMapping("/del/{roleId}")
     public Result<String> deleteRole(@PathVariable Long roleId) {
-        SysRole role = new SysRole();
-        role.setRoleId(roleId);
-        role.setIsDeleted(1);
-        roleService.updateById(role);
+        roleService.removeById(roleId);
         return Result.success("删除成功");
     }
 
     @ApiOperation("修改角色状态")
     @Log(module = "角色管理", type = OperationType.SELECT, value = "修改角色状态")
     @PatchMapping("/{roleId}/status")
-    public Result<String> updateStatus(
-            @PathVariable Long roleId,
-            @RequestParam Integer status) {
+    public Result<String> updateStatus(@PathVariable Long roleId, @RequestParam Integer status) {
         if (!Arrays.asList(0, 1).contains(status)) {
             return Result.failed("状态值无效");
         }

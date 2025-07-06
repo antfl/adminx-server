@@ -2,6 +2,7 @@ package com.bytescheduler.adminx.modules.system.service.impl;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.JwtTokenUtil;
@@ -46,14 +47,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void register(RegisterRequest request) {
-        String email = request.getEmail();
-        String captchaId = email + emailConfig.getKeyHead() + request.getCaptchaId();
+    public void register(RegisterRequest params) {
+        String email = params.getEmail();
+        String captchaId = email + emailConfig.getKeyHead() + params.getCaptchaId();
 
         //  判断是否走邮箱验证
         if (emailConfig.isVerificationEnabled()) {
             String rds_code = redisTemplate.opsForValue().get(captchaId);
-            String code = request.getCode();
+            String code = params.getCode();
 
             if (emailConfig.isIgnoreCase()) {
                 // 忽略大小写比较
@@ -69,26 +70,30 @@ public class AuthServiceImpl implements AuthService {
 
         }
 
-        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email", request.getEmail());
-        if (userMapper.selectCount(queryWrapper) > 0) {
-            throw new BusinessException("用户名已存在");
+        LambdaQueryWrapper<SysUser> queryUserEmail = new LambdaQueryWrapper<>();
+        queryUserEmail.eq(SysUser::getEmail, params.getEmail());
+        if (userMapper.selectCount(queryUserEmail) > 0) {
+            throw new BusinessException("用户已存在");
+        }
+
+        LambdaQueryWrapper<SysUser> queryUserNickname = new LambdaQueryWrapper<>();
+        queryUserNickname.eq(SysUser::getNickname, params.getNickname());
+        if (userMapper.selectCount(queryUserNickname) > 0) {
+            throw new BusinessException("该昵称已被使用");
         }
 
         SysUser user = new SysUser();
-        user.setUsername(request.getEmail());
-        BeanUtils.copyProperties(request, user);
-        user.setNickname(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setAvatar("");
+        BeanUtils.copyProperties(params, user);
+        user.setPassword(passwordEncoder.encode(params.getPassword()));
+        user.setAvatar("BOY_AVATAR_A");
         redisTemplate.delete(captchaId);
         userMapper.insert(user);
     }
 
     @Override
-    public TokenResponse login(LoginRequest request) {
-        String identifier = request.getUsername().trim();
-        String captchaId = captchaConfig.getKeyHead() + request.getCaptchaId();
+    public TokenResponse login(LoginRequest params) {
+        String identifier = params.getUsername().trim();
+        String captchaId = captchaConfig.getKeyHead() + params.getCaptchaId();
 
         // 获取 Redis 中验证码
         String rds_code = redisTemplate.opsForValue().get(captchaId);
@@ -97,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 处理忽略大小写
-        String code = request.getCode();
+        String code = params.getCode();
         if (captchaConfig.isIgnoreCase()) {
             if (code != null) {
                 code = code.toLowerCase();
@@ -121,17 +126,17 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("用户不存在");
         }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(params.getPassword(), user.getPassword())) {
             throw new BusinessException("密码错误");
         }
 
         redisTemplate.delete(captchaId);
 
-        String username = user.getUsername();
-        String token = jwtTokenUtil.generateToken(username, user.getUserId());
+        String userId = user.getUserId().toString();
+        String token = jwtTokenUtil.generateToken(userId, user.getUserId());
 
         redisTemplate.opsForValue().set(
-                username,
+                userId,
                 token,
                 jwtTokenUtil.getExpirationFromToken(token),
                 TimeUnit.MILLISECONDS
@@ -139,7 +144,6 @@ public class AuthServiceImpl implements AuthService {
 
         return new TokenResponse(token);
     }
-
 
     @Override
     public CaptchaResponse generateCaptcha() {

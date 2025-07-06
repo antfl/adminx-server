@@ -1,9 +1,12 @@
 package com.bytescheduler.adminx.modules.system.controller;
 
+import com.bytescheduler.adminx.annotation.Log;
 import com.bytescheduler.adminx.common.entity.Result;
+import com.bytescheduler.adminx.enums.OperationType;
 import com.bytescheduler.adminx.modules.system.dto.request.UserRoleRequest;
 import com.bytescheduler.adminx.modules.system.service.UserRoleService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,8 +27,10 @@ public class UserRoleController {
 
     private final UserRoleService userRoleService;
 
+    @ApiOperation("设置用户角色")
+    @Log(module = "设置用户角色", type = OperationType.INSERT, value = "设置用户角色")
     @PostMapping("/setRoles")
-    public Result<?> setUserRoles(@Valid @RequestBody UserRoleRequest dto) {
-        return userRoleService.setUserRoles(dto);
+    public Result<String> setUserRoles(@Valid @RequestBody UserRoleRequest params) {
+        return userRoleService.setUserRoles(params);
     }
 }

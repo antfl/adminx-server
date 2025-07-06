@@ -1,5 +1,6 @@
 package com.bytescheduler.adminx.modules.system.dto.response;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -8,7 +9,13 @@ import lombok.Data;
  */
 @Data
 public class UserInfoResponse {
+
+    @ApiModelProperty(value = "用户 ID")
     private Long userId;
-    private String username;
+
+    @ApiModelProperty(value = "昵称")
+    private String nickname;
+
+    @ApiModelProperty(value = "头像")
     private String avatar;
 }

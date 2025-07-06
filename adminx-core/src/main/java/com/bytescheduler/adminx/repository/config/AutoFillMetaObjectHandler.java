@@ -21,6 +21,7 @@ public class AutoFillMetaObjectHandler implements MetaObjectHandler {
 
         Long userId = UserContext.getCurrentUserId();
         this.strictInsertFill(metaObject, "createUser", Long.class, userId);
+        this.strictInsertFill(metaObject, "updateUser", Long.class, userId);
     }
 
     @Override

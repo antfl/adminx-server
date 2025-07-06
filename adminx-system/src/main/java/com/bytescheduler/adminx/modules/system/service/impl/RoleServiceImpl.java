@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
@@ -39,19 +40,23 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, SysRole> implements
     private final MenuService menuService;
 
     @Override
-    public Page<SysRole> listRoles(RoleQueryRequest queryRequest) {
-        Page<SysRole> page = new Page<>(queryRequest.getPage(), queryRequest.getSize());
+    public Result<PageResult<SysRole>> pageQuery(RoleQueryRequest params) {
+        Page<SysRole> page = Page.of(params.getCurrent(), params.getSize());
         LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.isNotBlank(params.getRoleName()), SysRole::getRoleName, SqlEscapeUtil.escapeLike(params.getRoleName()))
+                .like(StringUtils.isNotBlank(params.getRoleKey()), SysRole::getRoleKey, SqlEscapeUtil.escapeLike(params.getRoleKey()))
+                .eq(params.getStatus() != null, SysRole::getStatus, params.getStatus())
+                .orderByDesc(SysRole::getCreateTime);
 
-        wrapper.eq(SysRole::getIsDeleted, 0)
-                .like(StringUtils.isNotBlank(queryRequest.getRoleName()),
-                        SysRole::getRoleName, SqlEscapeUtil.escapeLike(queryRequest.getRoleName()))
-                .like(StringUtils.isNotBlank(queryRequest.getRoleKey()),
-                        SysRole::getRoleKey, SqlEscapeUtil.escapeLike(queryRequest.getRoleKey()))
-                .eq(queryRequest.getStatus() != null,
-                        SysRole::getStatus, queryRequest.getStatus());
+        Page<SysRole> result = this.page(page, wrapper);
 
-        return roleMapper.selectPage(page, wrapper);
+        return Result.success(PageResult.<SysRole>builder()
+                .total(result.getTotal())
+                .current(result.getCurrent())
+                .size(result.getSize())
+                .pages(result.getPages())
+                .records(result.getRecords())
+                .build());
     }
 
     @Override

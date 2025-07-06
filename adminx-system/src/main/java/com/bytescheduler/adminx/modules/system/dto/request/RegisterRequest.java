@@ -26,6 +26,11 @@ public class RegisterRequest {
     @Email(message = "请输入有效邮箱")
     private String email;
 
+    @NotBlank(message = "昵称必填")
+    @Size(min = 2, max = 32, message = "昵称长度需在2-32位之间")
+    @Pattern(regexp = "^\\S+$", message = "昵称不能包含空格")
+    private String nickname;
+
     @Pattern(
             regexp = "^$|^[a-fA-F0-9\\-]{36}$",
             message = "captchaId must be empty or a valid 36-character UUID"

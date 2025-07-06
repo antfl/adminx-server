@@ -1,7 +1,7 @@
 package com.bytescheduler.adminx.modules.system.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.modules.system.dto.request.RolePermissionsRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RoleQueryRequest;
@@ -14,7 +14,7 @@ import com.bytescheduler.adminx.modules.system.entity.SysRole;
  */
 public interface RoleService extends IService<SysRole> {
 
-    Page<SysRole> listRoles(RoleQueryRequest queryRequest);
+    Result<PageResult<SysRole>> pageQuery(RoleQueryRequest params);
 
     void createRole(RoleRequest dto);
 

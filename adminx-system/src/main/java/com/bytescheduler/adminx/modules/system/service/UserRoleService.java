@@ -8,5 +8,6 @@ import com.bytescheduler.adminx.modules.system.dto.request.UserRoleRequest;
  * @since 2025/6/16
  */
 public interface UserRoleService {
-    Result<?> setUserRoles(UserRoleRequest dto);
+
+    Result<String> setUserRoles(UserRoleRequest params);
 }
