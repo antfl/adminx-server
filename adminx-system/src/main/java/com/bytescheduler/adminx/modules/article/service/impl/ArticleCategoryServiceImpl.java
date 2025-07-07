@@ -9,6 +9,7 @@ import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryCreateRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryRequest;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
@@ -33,34 +34,40 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<ArticleCategory> saveUpdate(ArticleCategory articleCategory) {
-        if (articleCategory == null) {
+    public Result<ArticleCategory> saveUpdate(ArticleCategoryCreateRequest params) {
+        if (params == null) {
             return Result.failed("分类数据不能为空");
         }
 
         LambdaQueryWrapper<ArticleCategory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ArticleCategory::getCategoryName, articleCategory.getCategoryName());
+        queryWrapper.eq(ArticleCategory::getCategoryName, params.getCategoryName());
 
-        if (articleCategory.getCategoryId() != null) {
-            queryWrapper.ne(ArticleCategory::getCategoryId, articleCategory.getCategoryId());
+        if (params.getCategoryId() != null) {
+            queryWrapper.ne(ArticleCategory::getCategoryId, params.getCategoryId());
         }
 
         if (count(queryWrapper) > 0) {
             throw new BusinessException("分类名称已存在");
         }
 
-        boolean isInsert = articleCategory.getCategoryId() == null;
+        boolean isInsert = params.getCategoryId() == null;
+
+        ArticleCategory articleCategory = new ArticleCategory();
+        articleCategory.setCategoryName(params.getCategoryName());
+        articleCategory.setRemark(params.getRemark());
+        articleCategory.setCategoryId(params.getCategoryId());
 
         if (isInsert) {
             this.save(articleCategory);
         } else {
-            if (!Objects.equals(articleCategory.getCreateUser(), UserContext.getCurrentUserId())) {
+            ArticleCategory category = this.getById(params.getCategoryId());
+            if (!Objects.equals(category.getCreateUser(), UserContext.getCurrentUserId())) {
                 throw new BusinessException("无该操作权限");
             }
             this.updateById(articleCategory);
         }
 
-        ArticleCategory resultEntity = isInsert ? articleCategory : this.getById(articleCategory.getCategoryId());
+        ArticleCategory resultEntity = isInsert ? articleCategory : this.getById(params.getCategoryId());
         return Result.success(isInsert ? "新增成功" : "修改成功", resultEntity);
     }
 

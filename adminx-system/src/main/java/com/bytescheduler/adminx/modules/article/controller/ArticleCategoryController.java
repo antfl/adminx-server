@@ -2,6 +2,7 @@ package com.bytescheduler.adminx.modules.article.controller;
 
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
+import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryCreateRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryRequest;
 import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
 import com.bytescheduler.adminx.modules.article.service.ArticleCategoryService;
@@ -25,9 +26,9 @@ public class ArticleCategoryController {
     private final ArticleCategoryService categoryService;
 
     @ApiOperation("保存文章分类（新增或修改）")
-    @PostMapping("/save")
-    public Result<?> saveCategory(@RequestBody ArticleCategory category) {
-        return categoryService.saveUpdate(category);
+    @PostMapping("/saveUpdate")
+    public Result<?> saveUpdate(@Valid @RequestBody ArticleCategoryCreateRequest params) {
+        return categoryService.saveUpdate(params);
     }
 
     @ApiOperation("删除文章分类")

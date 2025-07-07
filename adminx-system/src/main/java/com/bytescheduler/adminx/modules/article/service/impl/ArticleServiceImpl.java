@@ -40,7 +40,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (isInsert) {
             this.save(article);
         } else {
-            if (!Objects.equals(article.getCreateUser(), UserContext.getCurrentUserId())) {
+            Article data = this.getById(article.getArticleId());
+            if (!Objects.equals(data.getCreateUser(), UserContext.getCurrentUserId())) {
                 throw new BusinessException("无该操作权限");
             }
             this.updateById(article);
