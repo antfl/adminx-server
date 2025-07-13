@@ -86,7 +86,7 @@ logging:
 captcha:
   width: 160
   height: 60
-  code-count: 6 # 验证码位数
+  code-count: 5 # 验证码位数
   interference-count: 20 # 影响线，越高越复杂
   expire-seconds: 60 # 过期时间 (秒)
   ignore-case: true # 是否忽略大小写 (默认不忽略)
