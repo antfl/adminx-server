@@ -57,8 +57,8 @@ public class UserAuthController {
 
     @ApiOperation("获取邮箱验证码")
     @Log(module = "获取邮箱验证码", type = OperationType.OTHER, value = "获取邮箱验证码")
-    @GetMapping("/sendMailCode/{mail}")
-    public Result<MailCodeResponse> getMailCaptcha(@Valid @PathVariable String mail, String type) {
+    @GetMapping("/sendMailCode/{mail}/{type}")
+    public Result<MailCodeResponse> getMailCaptcha(@Valid @PathVariable String mail, @PathVariable String type) {
         return Result.success(authService.generateMailCode(mail, type));
     }
 }

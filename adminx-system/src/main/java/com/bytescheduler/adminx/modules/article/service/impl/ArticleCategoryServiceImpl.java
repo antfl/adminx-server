@@ -39,6 +39,13 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             return Result.failed("分类数据不能为空");
         }
 
+        boolean isInsert = params.getCategoryId() == null;
+
+        long count = baseMapper.selectCount(new LambdaQueryWrapper<ArticleCategory>().eq(ArticleCategory::getCreateUser, UserContext.getCurrentUserId()));
+        if (isInsert && count >= 3) {
+            return Result.failed("每个用户最多可以新建 3 个分类");
+        }
+
         LambdaQueryWrapper<ArticleCategory> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ArticleCategory::getCategoryName, params.getCategoryName());
 
@@ -49,8 +56,6 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
         if (count(queryWrapper) > 0) {
             throw new BusinessException("分类名称已存在");
         }
-
-        boolean isInsert = params.getCategoryId() == null;
 
         ArticleCategory articleCategory = new ArticleCategory();
         articleCategory.setCategoryName(params.getCategoryName());

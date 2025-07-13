@@ -26,7 +26,7 @@ public class CommentController {
     @ApiOperation("文章评论")
     @PostMapping("/save")
     public Result<String> saveComment(@RequestBody CommentCreateRequest params) {
-        return commentService.saveComment(params) ? Result.success() : Result.failed("评论成功");
+        return commentService.saveComment(params) ? Result.success("评论成功") : Result.failed();
     }
 
     @ApiOperation("删除文章评论")

@@ -28,10 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +45,12 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Result<String> updateUser(UpdateUserRequest params) {
+        SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+                .eq(SysUser::getUserId, params.getUserId()));
+        if (!Objects.equals(user.getUserId(), UserContext.getCurrentUserId())) {
+            return Result.failed("无该操作权限");
+        }
+
         if (StringUtils.isNotBlank(params.getUsername())) {
             Long usernameCount = sysUserMapper.selectCount(new LambdaQueryWrapper<SysUser>()
                     .eq(SysUser::getUsername, params.getUsername())

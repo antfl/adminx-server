@@ -39,6 +39,15 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Transactional(rollbackFor = Exception.class)
     public boolean saveComment(CommentCreateRequest params) {
 
+        long count = baseMapper.selectCount(new LambdaQueryWrapper<Comment>()
+                .eq(Comment::getCreateUser, UserContext.getCurrentUserId())
+                .eq(Comment::getArticleId, params.getArticleId())
+        );
+
+        if (count >= 50) {
+            return false;
+        }
+
         Comment comment = new Comment();
         comment.setArticleId(params.getArticleId());
         comment.setContent(params.getContent());

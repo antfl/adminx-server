@@ -39,9 +39,21 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
         boolean isInsert = dict.getId() == null;
 
+        long count = baseMapper.selectCount(new LambdaQueryWrapper<SysDict>()
+                .eq(SysDict::getCreateUser, UserContext.getCurrentUserId())
+        );
+
+        if (isInsert && count >= 5) {
+            return Result.failed("最多允许新增 5 个字典分类");
+        }
+
         if (isInsert) {
             this.save(dict);
         } else {
+            SysDict sysDict = this.getById(dict.getId());
+            if (!Objects.equals(sysDict.getCreateUser(), UserContext.getCurrentUserId())) {
+                return Result.failed("无该操作权限");
+            }
             this.updateById(dict);
         }
 
@@ -54,8 +66,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     public Result<Void> deleteDict(Long id) {
         SysDict sysDict = this.getById(id);
 
-        Long currentUserId = UserContext.getCurrentUserId();
-        if (!Objects.equals(sysDict.getCreateUser(), currentUserId)) {
+        if (!Objects.equals(sysDict.getCreateUser(), UserContext.getCurrentUserId())) {
             return Result.failed("无该操作权限");
         }
         return this.removeById(id) ?

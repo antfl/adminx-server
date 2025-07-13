@@ -37,6 +37,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         boolean isInsert = article.getArticleId() == null;
 
+        long count = baseMapper.selectCount(new LambdaQueryWrapper<Article>().eq(Article::getCreateUser, UserContext.getCurrentUserId()));
+        if (isInsert && count >= 50) {
+            return Result.failed("每个用户最多可以新建 50 个文章");
+        }
+
         if (isInsert) {
             this.save(article);
         } else {
