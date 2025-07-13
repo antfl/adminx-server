@@ -1,13 +1,16 @@
 package com.bytescheduler.adminx.modules.system.service.impl;
 
-import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.captcha.generator.RandomGenerator;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.JwtTokenUtil;
 import com.bytescheduler.adminx.common.utils.MailUtil;
 import com.bytescheduler.adminx.modules.system.dto.request.LoginRequest;
+import com.bytescheduler.adminx.modules.system.dto.request.PasswordResetRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RegisterRequest;
 import com.bytescheduler.adminx.modules.system.dto.response.CaptchaResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.MailCodeResponse;
@@ -51,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
         String email = params.getEmail();
         String captchaId = email + emailConfig.getKeyHead() + params.getCaptchaId();
 
-        //  判断是否走邮箱验证
+        // 判断是否走邮箱验证
         if (emailConfig.isVerificationEnabled()) {
             String rds_code = redisTemplate.opsForValue().get(captchaId);
             String code = params.getCode();
@@ -67,7 +70,6 @@ public class AuthServiceImpl implements AuthService {
                     throw new BusinessException("验证码错误");
                 }
             }
-
         }
 
         LambdaQueryWrapper<SysUser> queryUserEmail = new LambdaQueryWrapper<>();
@@ -146,12 +148,50 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public void passwordReset(PasswordResetRequest params) {
+
+        if(!Objects.equals(params.getPassword(), params.getConfirmPassword())) {
+            throw new BusinessException("确认密码与设置的密码不一致");
+        }
+
+        String email = params.getEmail();
+        String captchaId = email + emailConfig.getKeyHead() + params.getCaptchaId();
+
+        String rdsCode = redisTemplate.opsForValue().get(captchaId);
+        String code = params.getCode();
+
+        // 校验验证码
+        if (rdsCode == null || !rdsCode.equalsIgnoreCase(code)) {
+            throw new BusinessException("验证码错误");
+        }
+
+        LambdaQueryWrapper<SysUser> queryUserEmail = new LambdaQueryWrapper<>();
+        queryUserEmail.eq(SysUser::getEmail, params.getEmail());
+        SysUser sysUser = userMapper.selectOne(queryUserEmail);
+        if (sysUser == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(SysUser::getUserId, sysUser.getUserId());
+        String newPassword = passwordEncoder.encode(params.getPassword());
+        // 重置密码
+        updateWrapper.set(StringUtils.isNotBlank(newPassword), SysUser::getPassword, newPassword);
+        userMapper.update(null, updateWrapper);
+        // 清除当前 TOKEN
+        redisTemplate.delete(sysUser.getUserId() + "");
+        redisTemplate.delete(captchaId);
+    }
+
+    @Override
     public CaptchaResponse generateCaptcha() {
-        // 生成验证码（宽、高、字符数、干扰线数）
-        LineCaptcha captcha = CaptchaUtil.createLineCaptcha(
+        RandomGenerator numberGenerator = new RandomGenerator("0123456789", captchaConfig.getCodeCount());
+
+        // 生成验证码（宽、高、验证码、干扰线数）
+        LineCaptcha captcha = new LineCaptcha(
                 captchaConfig.getWidth(),
                 captchaConfig.getHeight(),
-                captchaConfig.getCodeCount(),
+                numberGenerator,
                 captchaConfig.getInterferenceCount()
         );
 
@@ -174,13 +214,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public MailCodeResponse generateMailCode(String email) {
-        // 如果已经注册的邮箱不发验证码
-        QueryWrapper<SysUser> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.eq("email", email);
-        SysUser sysUser = userMapper.selectOne(userQueryWrapper);
-        if (sysUser != null) {
-            throw new BusinessException("该用户已注册");
+    public MailCodeResponse generateMailCode(String email, String type) {
+        if (Objects.equals(type, "REGISTER")) {
+            // 如果已经注册的邮箱不发验证码
+            QueryWrapper<SysUser> userQueryWrapper = new QueryWrapper<>();
+            userQueryWrapper.eq("email", email);
+            SysUser sysUser = userMapper.selectOne(userQueryWrapper);
+            if (sysUser != null) {
+                throw new BusinessException("该用户已注册");
+            }
         }
 
         // 生成验证码

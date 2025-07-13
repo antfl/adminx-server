@@ -4,6 +4,7 @@ import com.bytescheduler.adminx.annotation.Log;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.enums.OperationType;
 import com.bytescheduler.adminx.modules.system.dto.request.LoginRequest;
+import com.bytescheduler.adminx.modules.system.dto.request.PasswordResetRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RegisterRequest;
 import com.bytescheduler.adminx.modules.system.dto.response.CaptchaResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.MailCodeResponse;
@@ -39,6 +40,14 @@ public class UserAuthController {
         return Result.success(authService.login(loginRequest));
     }
 
+    @ApiOperation("修改密码")
+    @Log(module = "修改密码", type = OperationType.USER_LOGIN, value = "修改密码")
+    @PostMapping("/passwordReset")
+    public Result<String> passwordReset(@Valid @RequestBody PasswordResetRequest params) {
+        authService.passwordReset(params);
+        return Result.success("操作成功");
+    }
+
     @ApiOperation("获取图片验证码")
     @Log(module = "获取图片验证码", type = OperationType.OTHER, value = "获取图片验证码")
     @GetMapping("/captcha")
@@ -49,7 +58,7 @@ public class UserAuthController {
     @ApiOperation("获取邮箱验证码")
     @Log(module = "获取邮箱验证码", type = OperationType.OTHER, value = "获取邮箱验证码")
     @GetMapping("/sendMailCode/{mail}")
-    public Result<MailCodeResponse> getMailCaptcha(@Valid @PathVariable String mail) {
-        return Result.success(authService.generateMailCode(mail));
+    public Result<MailCodeResponse> getMailCaptcha(@Valid @PathVariable String mail, String type) {
+        return Result.success(authService.generateMailCode(mail, type));
     }
 }
