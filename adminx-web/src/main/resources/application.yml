@@ -91,3 +91,9 @@ captcha:
   expire-seconds: 60 # 过期时间 (秒)
   ignore-case: true # 是否忽略大小写 (默认不忽略)
   key-head: "captcha:" # 验证码 (key) 的头
+
+rate:
+  limit:
+    max-requests: 10 # 单位时间内最多连接次数
+    interval-seconds: 10 # 10（秒）为一个单位
+    ban-seconds: 1800 # 封禁时间（秒）
