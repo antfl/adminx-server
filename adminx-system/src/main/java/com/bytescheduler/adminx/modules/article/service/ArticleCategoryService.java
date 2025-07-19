@@ -5,6 +5,7 @@ import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryCreateRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryRequest;
+import com.bytescheduler.adminx.modules.article.dto.response.CategoryResponse;
 import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
 
 /**
@@ -17,5 +18,5 @@ public interface ArticleCategoryService extends IService<ArticleCategory> {
 
     Result<String> deleteCategory(Long id);
 
-    Result<PageResult<ArticleCategory>> pageQuery(ArticleCategoryRequest params);
+    Result<PageResult<CategoryResponse>> pageQuery(ArticleCategoryRequest params);
 }

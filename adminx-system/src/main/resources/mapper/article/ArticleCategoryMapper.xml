@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytescheduler.adminx.modules.article.mapper.ArticleCategoryMapper">
+
+    <select id="selectCategoryPage" resultType="com.bytescheduler.adminx.modules.article.dto.response.CategoryResponse">
+        SELECT
+        ac.category_id as categoryId,
+        ac.category_name AS categoryName,
+        ac.remark,
+        su.nickname AS createUserName,
+        ac.create_time AS createTime,
+        ac.update_time AS updateTime
+        FROM article_category ac
+        LEFT JOIN sys_user su ON ac.create_user = su.user_id
+        WHERE ac.is_deleted = 0
+        <if test="params.categoryName != null and params.categoryName != ''">
+            AND ac.category_name LIKE CONCAT('%', #{params.categoryName}, '%')
+        </if>
+        <if test="params.createUserName != null and params.createUserName != ''">
+            AND su.nickname LIKE CONCAT('%', #{params.createUserName}, '%')
+        </if>
+        ORDER BY ac.create_time DESC
+    </select>
+</mapper>

@@ -1,16 +1,15 @@
 package com.bytescheduler.adminx.modules.article.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleQueryRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
+import com.bytescheduler.adminx.modules.article.dto.response.ArticlePageResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.mapper.ArticleMapper;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
@@ -92,21 +91,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     }
 
     @Override
-    public Result<PageResult<Article>> pageQuery(ArticleQueryRequest params) {
-        Page<Article> page = Page.of(params.getCurrent(), params.getSize());
-        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.isNotBlank(params.getTitle()), Article::getTitle, SqlEscapeUtil.escapeLike(params.getTitle()))
-                .eq(params.getCategoryId() != null, Article::getCategoryId, params.getCategoryId())
-                .orderByDesc(Article::getCreateTime);
+    public Result<PageResult<ArticlePageResponse>> pageQuery(ArticleQueryRequest params) {
 
-        Page<Article> result = this.page(page, wrapper);
+        Page<ArticlePageResponse> page = new Page<>(params.getCurrent(), params.getSize());
+        articleMapper.pageQueryArticle(page, params);
 
-        return Result.success(PageResult.<Article>builder()
-                .total(result.getTotal())
-                .current(result.getCurrent())
-                .size(result.getSize())
-                .pages(result.getPages())
-                .records(result.getRecords())
+        return Result.success(PageResult.<ArticlePageResponse>builder()
+                .total(page.getTotal())
+                .current(page.getCurrent())
+                .size(page.getSize())
+                .pages(page.getPages())
+                .records(page.getRecords())
                 .build());
     }
 }

@@ -1,16 +1,16 @@
 package com.bytescheduler.adminx.modules.article.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
 import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryCreateRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryRequest;
+import com.bytescheduler.adminx.modules.article.dto.response.CategoryResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
 import com.bytescheduler.adminx.modules.article.mapper.ArticleCategoryMapper;
@@ -96,20 +96,17 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
     }
 
     @Override
-    public Result<PageResult<ArticleCategory>> pageQuery(ArticleCategoryRequest params) {
-        Page<ArticleCategory> page = Page.of(params.getCurrent(), params.getSize());
-        LambdaQueryWrapper<ArticleCategory> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.isNotBlank(params.getCategoryName()), ArticleCategory::getCategoryName, SqlEscapeUtil.escapeLike(params.getCategoryName())
-        ).orderByDesc(ArticleCategory::getCreateTime);
+    public Result<PageResult<CategoryResponse>> pageQuery(ArticleCategoryRequest params) {
 
-        Page<ArticleCategory> result = this.page(page, wrapper);
+        IPage<CategoryResponse> page = new Page<>(params.getCurrent(), params.getSize());
+        baseMapper.selectCategoryPage(page, params);
 
-        return Result.success(PageResult.<ArticleCategory>builder()
-                .total(result.getTotal())
-                .current(result.getCurrent())
-                .size(result.getSize())
-                .pages(result.getPages())
-                .records(result.getRecords())
+        return Result.success(PageResult.<CategoryResponse>builder()
+                .total(page.getTotal())
+                .current(page.getCurrent())
+                .size(page.getSize())
+                .pages(page.getPages())
+                .records(page.getRecords())
                 .build());
     }
 }

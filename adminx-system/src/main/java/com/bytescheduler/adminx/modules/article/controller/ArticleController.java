@@ -4,6 +4,7 @@ import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleQueryRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
+import com.bytescheduler.adminx.modules.article.dto.response.ArticlePageResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
 import io.swagger.annotations.Api;
@@ -42,7 +43,7 @@ public class ArticleController {
 
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public Result<PageResult<Article>> pageArticle(ArticleQueryRequest params) {
+    public Result<PageResult<ArticlePageResponse>> pageArticle(ArticleQueryRequest params) {
         return articleService.pageQuery(params);
     }
 }

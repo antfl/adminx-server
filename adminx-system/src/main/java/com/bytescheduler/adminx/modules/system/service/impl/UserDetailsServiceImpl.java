@@ -26,23 +26,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 1. 查询数据库中的用户
         SysUser sysUser = sysUserMapper.selectByUsername(username);
         if (sysUser == null) {
             throw new UsernameNotFoundException("用户不存在: " + username);
         }
 
-        // 2. 检查账号状态
         if (sysUser.getStatus() == 1) {
             throw new UsernameNotFoundException("账号已停用");
         }
 
-        // 3. 转换权限（根据你的实际权限字段调整）
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_USER") // 示例权限，需从数据库读取实际权限
+                new SimpleGrantedAuthority("ROLE_USER")
         );
 
-        // 4. 构建 Spring Security 的 UserDetails 对象
         return new User(
                 sysUser.getUsername(),
                 sysUser.getPassword(),

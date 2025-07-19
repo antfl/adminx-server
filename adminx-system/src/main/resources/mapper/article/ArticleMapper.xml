@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytescheduler.adminx.modules.article.mapper.ArticleMapper">
+
+    <select id="pageQueryArticle" resultType="com.bytescheduler.adminx.modules.article.dto.response.ArticlePageResponse">
+        SELECT
+        a.article_id AS articleId,
+        a.title,
+        ac.category_name AS categoryName,
+        a.category_id AS categoryId,
+        COALESCE(SUM(i.type = 'like'), 0) AS likeCount,
+        COALESCE(SUM(i.type = 'favorite'), 0) AS favoriteCount,
+        COALESCE(c.comment_count, 0) AS commentCount,
+        u.nickname AS createUserName,
+        a.create_time AS createTime,
+        a.update_time AS updateTime
+        FROM article a
+        INNER JOIN article_category ac
+        ON a.category_id = ac.category_id
+        AND ac.is_deleted = 0
+        INNER JOIN sys_user u
+        ON a.create_user = u.user_id
+        LEFT JOIN interaction i
+        ON a.article_id = i.article_id
+        AND i.type IN ('like', 'favorite')
+        LEFT JOIN (
+        SELECT article_id, COUNT(*) AS comment_count
+        FROM comment
+        GROUP BY article_id
+        ) c ON a.article_id = c.article_id
+        WHERE
+        a.is_deleted = 0
+        AND a.status = 1
+        <if test="params.title != null and params.title != ''">
+            AND a.title LIKE CONCAT('%', #{params.title}, '%')
+        </if>
+        <if test="params.categoryId != null">
+            AND a.category_id = #{params.categoryId}
+        </if>
+        GROUP BY a.article_id
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectArticleDetailById" resultType="com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse">
+        SELECT a.article_id                            AS articleId,
+               a.title,
+               a.content,
+               a.create_time                           AS createTime,
+               a.STATUS,
+               a.like_count                            AS likeCount,
+               u.user_id                               AS userId,
+               u.nickname,
+               u.avatar,
+               c.category_name                         AS categoryName,
+               COUNT(DISTINCT i_fav.interaction_id)    AS favoriteCount,
+               COUNT(DISTINCT cmt.comment_id)          AS commentCount,
+               MAX(IF(il_like.type = 'like', 1, 0))    AS isLiked,
+               MAX(IF(il_fav.type = 'favorite', 1, 0)) AS isFavorite
+        FROM article a
+                 LEFT JOIN sys_user u ON a.create_user = u.user_id
+                 LEFT JOIN article_category c ON a.category_id = c.category_id
+                 LEFT JOIN interaction i_fav ON a.article_id = i_fav.article_id AND i_fav.type = 'favorite'
+                 LEFT JOIN comment cmt ON a.article_id = cmt.article_id
+                 LEFT JOIN interaction il_like ON a.article_id = il_like.article_id
+            AND il_like.type = 'like'
+            AND il_like.create_user = #{userId}
+                 LEFT JOIN interaction il_fav ON a.article_id = il_fav.article_id
+            AND il_fav.type = 'favorite'
+            AND il_fav.create_user = #{userId}
+        WHERE a.article_id = #{id}
+    </select>
+</mapper>

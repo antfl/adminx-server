@@ -4,6 +4,7 @@ import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryCreateRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryRequest;
+import com.bytescheduler.adminx.modules.article.dto.response.CategoryResponse;
 import com.bytescheduler.adminx.modules.article.entity.ArticleCategory;
 import com.bytescheduler.adminx.modules.article.service.ArticleCategoryService;
 import io.swagger.annotations.Api;
@@ -45,7 +46,7 @@ public class ArticleCategoryController {
 
     @ApiOperation("分页查询文章分类")
     @GetMapping("/page")
-    public Result<PageResult<ArticleCategory>> pageCategory(@Valid ArticleCategoryRequest params) {
+    public Result<PageResult<CategoryResponse>> pageCategory(@Valid ArticleCategoryRequest params) {
         return categoryService.pageQuery(params);
     }
 

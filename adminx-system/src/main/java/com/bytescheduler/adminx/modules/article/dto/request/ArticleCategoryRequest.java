@@ -15,4 +15,7 @@ public class ArticleCategoryRequest extends PageParams {
 
     @ApiModelProperty(value = "分类名称")
     private String categoryName;
+
+    @ApiModelProperty(value = "创建人")
+    private String createUserName;
 }
