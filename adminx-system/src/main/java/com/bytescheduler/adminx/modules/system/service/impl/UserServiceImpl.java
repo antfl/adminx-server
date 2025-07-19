@@ -120,6 +120,8 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
         response.setUserId(user.getUserId());
         response.setNickname(user.getNickname());
         response.setAvatar(user.getAvatar());
+        response.setGender(user.getGender());
+        response.setUsername(user.getUsername());
 
         return Result.success(response);
     }

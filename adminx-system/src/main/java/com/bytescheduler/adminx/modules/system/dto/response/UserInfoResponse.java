@@ -13,8 +13,14 @@ public class UserInfoResponse {
     @ApiModelProperty(value = "用户 ID")
     private Long userId;
 
+    @ApiModelProperty(value = "用户名")
+    private String username;
+
     @ApiModelProperty(value = "昵称")
     private String nickname;
+
+    @ApiModelProperty(value = "性别")
+    private Integer gender;
 
     @ApiModelProperty(value = "头像")
     private String avatar;

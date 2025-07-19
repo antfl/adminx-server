@@ -3,8 +3,6 @@ package com.bytescheduler.adminx.modules.system.dto.request;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.util.List;
@@ -21,7 +19,6 @@ public class UpdateUserRequest {
     private Long userId;
 
     @ApiModelProperty(value = "角色 ID 数组")
-    @NotEmpty(message = "角色 ID 数组不能为空")
     private List<Long> roleIds;
 
     @ApiModelProperty(value = "昵称")

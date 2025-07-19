@@ -9,7 +9,7 @@ import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @since 2025/6/21
  */
 @Api(tags = "文章管理")
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/article")
 public class ArticleController {
