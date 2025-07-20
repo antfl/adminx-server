@@ -94,7 +94,9 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     public Result<PageResult<UserResponse>> pageQuery(UserQueryRequest params) {
         Page<SysUser> page = Page.of(params.getCurrent(), params.getSize());
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(params.getStatus() != null, SysUser::getStatus, params.getStatus())
+        wrapper.eq(params.getStatus() != null, SysUser::getStatus, params.getStatus())
+                .like(StringUtils.isNotBlank(params.getUsername()), SysUser::getUsername, params.getUsername())
+                .like(StringUtils.isNotBlank(params.getNickname()), SysUser::getNickname, params.getNickname())
                 .orderByDesc(SysUser::getCreateTime);
 
         Page<SysUser> result = this.page(page, wrapper);

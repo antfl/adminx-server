@@ -15,4 +15,11 @@ public class UserQueryRequest extends PageParams {
 
     @ApiModelProperty(value = "状态")
     private Integer status;
+
+
+    @ApiModelProperty(value = "用户名")
+    private String username;
+
+    @ApiModelProperty(value = "昵称")
+    private String nickname;
 }
