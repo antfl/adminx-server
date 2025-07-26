@@ -51,7 +51,7 @@ public class RoleController {
     }
 
     @ApiOperation("创建角色")
-    @Log(module = "角色管理", type = OperationType.SELECT, value = "创建角色")
+    @Log(module = "角色管理", type = OperationType.INSERT, value = "创建角色")
     @PostMapping
     public Result<String> createRole(@Valid @RequestBody RoleRequest params) {
         roleService.createRole(params);
@@ -59,7 +59,7 @@ public class RoleController {
     }
 
     @ApiOperation("更新角色")
-    @Log(module = "角色管理", type = OperationType.SELECT, value = "更新角色")
+    @Log(module = "角色管理", type = OperationType.UPDATE, value = "更新角色")
     @PutMapping("/{roleId}")
     public Result<String> updateRole(@PathVariable Long roleId, @Valid @RequestBody RoleRequest params) {
         roleService.updateRole(roleId, params);
@@ -67,7 +67,7 @@ public class RoleController {
     }
 
     @ApiOperation("删除角色")
-    @Log(module = "角色管理", type = OperationType.SELECT, value = "删除角色")
+    @Log(module = "角色管理", type = OperationType.DELETE, value = "删除角色")
     @DeleteMapping("/del/{roleId}")
     public Result<String> deleteRole(@PathVariable Long roleId) {
         roleService.removeById(roleId);
@@ -75,7 +75,7 @@ public class RoleController {
     }
 
     @ApiOperation("修改角色状态")
-    @Log(module = "角色管理", type = OperationType.SELECT, value = "修改角色状态")
+    @Log(module = "角色管理", type = OperationType.UPDATE, value = "修改角色状态")
     @PatchMapping("/{roleId}/status")
     public Result<String> updateStatus(@PathVariable Long roleId, @RequestParam Integer status) {
         if (!Arrays.asList(0, 1).contains(status)) {
@@ -97,7 +97,7 @@ public class RoleController {
     }
 
     @ApiOperation("编辑角色菜单权限")
-    @Log(module = "角色管理", type = OperationType.SELECT, value = "编辑角色菜单权限")
+    @Log(module = "角色管理", type = OperationType.UPDATE, value = "编辑角色菜单权限")
     @PostMapping("/setRoleMenus")
     public Result<String> setRoleMenus(@Valid @RequestBody RoleMenuRequest dto) {
         return roleMenuService.setRoleMenus(dto);

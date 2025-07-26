@@ -40,14 +40,14 @@ public class UserController {
     }
 
     @ApiOperation("获取用户信息")
-    @Log(module = "用户管理", type = OperationType.UPDATE, value = "获取用户信息")
+    @Log(module = "用户管理", type = OperationType.SELECT, value = "获取用户信息")
     @GetMapping("/getUserInfo")
     public Result<UserInfoResponse> getUserInfo() {
         return userService.getUserInfo();
     }
 
     @ApiOperation("获取用户权限")
-    @Log(module = "用户管理", type = OperationType.UPDATE, value = "获取用户权限")
+    @Log(module = "用户管理", type = OperationType.SELECT, value = "获取用户权限")
     @GetMapping("/permissions")
     public Result<UserPermissionResponse> getPermissions() {
         return userService.getPermissions();

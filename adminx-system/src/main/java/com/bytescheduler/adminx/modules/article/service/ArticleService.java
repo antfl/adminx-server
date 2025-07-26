@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleQueryRequest;
+import com.bytescheduler.adminx.modules.article.dto.request.ArticleSaveRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticlePageResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
@@ -14,7 +15,7 @@ import com.bytescheduler.adminx.modules.article.entity.Article;
  */
 public interface ArticleService extends IService<Article> {
 
-    Result<Article> saveUpdate(Article article);
+    Result<Article> saveUpdate(ArticleSaveRequest params);
 
     Result<String> deleteArticle(Long id);
 

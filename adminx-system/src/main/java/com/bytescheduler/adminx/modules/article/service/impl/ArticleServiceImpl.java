@@ -8,12 +8,14 @@ import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleQueryRequest;
+import com.bytescheduler.adminx.modules.article.dto.request.ArticleSaveRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticlePageResponse;
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.mapper.ArticleMapper;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -29,22 +31,26 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private final ArticleMapper articleMapper;
 
     @Override
-    public Result<Article> saveUpdate(Article article) {
-        if (article == null) {
+    public Result<Article> saveUpdate(ArticleSaveRequest params) {
+        if (params == null) {
             return Result.failed("文章数据不能为空");
         }
 
-        boolean isInsert = article.getArticleId() == null;
+        boolean isInsert = params.getArticleId() == null;
 
         long count = baseMapper.selectCount(new LambdaQueryWrapper<Article>().eq(Article::getCreateUser, UserContext.getCurrentUserId()));
         if (isInsert && count >= 50) {
             return Result.failed("每个用户最多可以新建 50 个文章");
         }
 
+        Article article = new Article();
+        BeanUtils.copyProperties(params, article);
+
         if (isInsert) {
+
             this.save(article);
         } else {
-            Article data = this.getById(article.getArticleId());
+            Article data = this.getById(params.getArticleId());
             if (!Objects.equals(data.getCreateUser(), UserContext.getCurrentUserId())) {
                 throw new BusinessException("无该操作权限");
             }

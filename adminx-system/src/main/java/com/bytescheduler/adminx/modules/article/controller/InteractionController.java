@@ -2,7 +2,9 @@ package com.bytescheduler.adminx.modules.article.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.bytescheduler.adminx.annotation.Log;
 import com.bytescheduler.adminx.common.entity.Result;
+import com.bytescheduler.adminx.enums.OperationType;
 import com.bytescheduler.adminx.modules.article.entity.Interaction;
 import com.bytescheduler.adminx.modules.article.service.InteractionService;
 import io.swagger.annotations.Api;
@@ -23,12 +25,14 @@ import java.util.List;
 public class InteractionController {
     private final InteractionService interactionService;
 
-    @ApiOperation("切换用户对文章的互动状态（点赞/收藏")
+    @Log(module = "文章互动", type = OperationType.UPDATE, value = "切换用户对文章的互动状态-点赞或收藏")
+    @ApiOperation("切换用户对文章的互动状态-点赞或收藏")
     @PostMapping("/toggle")
     public Result<String> toggleInteraction(@RequestBody Interaction interaction) {
         return interactionService.toggleInteraction(interaction);
     }
 
+    @Log(module = "文章互动", type = OperationType.SELECT, value = "查询用户的互动记录")
     @ApiOperation("查询用户的互动记录")
     @GetMapping("/user")
     public Result<List<Interaction>> getUserInteractions(

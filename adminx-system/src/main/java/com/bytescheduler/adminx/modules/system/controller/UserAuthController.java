@@ -41,7 +41,7 @@ public class UserAuthController {
     }
 
     @ApiOperation("修改密码")
-    @Log(module = "修改密码", type = OperationType.USER_LOGIN, value = "修改密码")
+    @Log(module = "修改密码", type = OperationType.UPDATE, value = "修改密码")
     @PostMapping("/passwordReset")
     public Result<String> passwordReset(@Valid @RequestBody PasswordResetRequest params) {
         authService.passwordReset(params);
