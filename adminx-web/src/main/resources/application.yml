@@ -4,6 +4,18 @@ server:
   servlet:
     context-path: /api
 
+# 接口加签配置
+signature:
+  max-time-diff: 10000 # 签名有效期 10 秒
+  secret-key: 8D7F2A9C4E5B1F3A6C9D2E8F7B1A5C3D
+
+# 文件服务配置
+file:
+  upload-dir: /var/uploads
+#  upload-dir: E:\file
+  max-file-size: 1
+  expiration: 10080 # 文件 token 有效期（分钟）默认 7 天
+
 # Spring 数据源配置
 spring:
   main:
