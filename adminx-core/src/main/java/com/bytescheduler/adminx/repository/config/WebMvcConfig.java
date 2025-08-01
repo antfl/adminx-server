@@ -1,6 +1,7 @@
 package com.bytescheduler.adminx.repository.config;
 
 import com.bytescheduler.adminx.security.RateLimitInterceptor;
+import com.bytescheduler.adminx.security.SignatureInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,6 +19,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final RateLimitConfig rateLimitConfig;
+    private final SignatureConfig signatureConfig;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -38,6 +40,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+
+        // 签名验证拦截器
+        registry.addInterceptor(
+                new SignatureInterceptor(
+                        signatureConfig.getSecretKey(),
+                        signatureConfig.getMaxTimeDiff(),
+                        redisTemplate
+                )
+        ).addPathPatterns("/**").excludePathPatterns("/files/view/**");
+
+        // 限流拦截器
         registry.addInterceptor(
                 new RateLimitInterceptor(
                         redisTemplate,

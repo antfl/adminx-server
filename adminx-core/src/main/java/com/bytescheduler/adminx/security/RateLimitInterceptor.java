@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 限流拦截器
+ *
  * @author byte-scheduler
  * @since 2025/7/15
  */

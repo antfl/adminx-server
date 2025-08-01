@@ -44,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/**", "/error").permitAll();
+                .antMatchers("/auth/**", "/error", "/files/view/**").permitAll();
 
         if (knife4jEnable) {
             http.authorizeRequests()
