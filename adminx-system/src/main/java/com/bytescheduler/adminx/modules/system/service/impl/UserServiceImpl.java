@@ -21,6 +21,7 @@ import com.bytescheduler.adminx.modules.system.mapper.MenuMapper;
 import com.bytescheduler.adminx.modules.system.mapper.RoleMenuMapper;
 import com.bytescheduler.adminx.modules.system.mapper.SysUserMapper;
 import com.bytescheduler.adminx.modules.system.mapper.UserRoleMapper;
+import com.bytescheduler.adminx.modules.system.service.FileService;
 import com.bytescheduler.adminx.modules.system.service.MenuService;
 import com.bytescheduler.adminx.modules.system.service.UserRoleService;
 import com.bytescheduler.adminx.modules.system.service.UserService;
@@ -41,6 +42,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     private final RoleMenuMapper roleMenuMapper;
     private final MenuMapper menuMapper;
     private final MenuService menuService;
+    private final FileService fileService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -102,6 +104,10 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
         Page<SysUser> result = this.page(page, wrapper);
         List<UserResponse> list = result.getRecords().stream().map(this::convertResponse).collect(Collectors.toList());
 
+        for (UserResponse user : list) {
+            user.setAvatar(fileService.getFileToken(user.getAvatar()));
+        }
+
         return Result.success(PageResult.<UserResponse>builder()
                 .total(result.getTotal())
                 .current(result.getCurrent())
@@ -121,7 +127,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
         UserInfoResponse response = new UserInfoResponse();
         response.setUserId(user.getUserId());
         response.setNickname(user.getNickname());
-        response.setAvatar(user.getAvatar());
+        response.setAvatar(fileService.getFileToken(user.getAvatar()));
         response.setGender(user.getGender());
         response.setUsername(user.getUsername());
 

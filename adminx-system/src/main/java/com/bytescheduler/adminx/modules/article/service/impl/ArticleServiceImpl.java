@@ -14,6 +14,7 @@ import com.bytescheduler.adminx.modules.article.dto.response.ArticlePageResponse
 import com.bytescheduler.adminx.modules.article.entity.Article;
 import com.bytescheduler.adminx.modules.article.mapper.ArticleMapper;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
+import com.bytescheduler.adminx.modules.system.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.Objects;
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
     private final ArticleMapper articleMapper;
+    private final FileService fileService;
 
     @Override
     public Result<Article> saveUpdate(ArticleSaveRequest params) {
@@ -93,7 +95,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public ArticleDetailResponse getArticleDetailById(Long id) {
         Long currentUserId = UserContext.getCurrentUserId();
-        return articleMapper.selectArticleDetailById(id, currentUserId);
+        ArticleDetailResponse res = articleMapper.selectArticleDetailById(id, currentUserId);
+        res.setAvatar(fileService.getFileToken(res.getAvatar()));
+        return res;
     }
 
     @Override

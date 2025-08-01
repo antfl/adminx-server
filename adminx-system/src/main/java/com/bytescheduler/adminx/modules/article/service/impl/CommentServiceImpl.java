@@ -18,6 +18,7 @@ import com.bytescheduler.adminx.modules.article.entity.Comment;
 import com.bytescheduler.adminx.modules.article.mapper.ArticleMapper;
 import com.bytescheduler.adminx.modules.article.mapper.CommentMapper;
 import com.bytescheduler.adminx.modules.article.service.CommentService;
+import com.bytescheduler.adminx.modules.system.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
     private final ArticleMapper articleMapper;
     private final CommentMapper commentMapper;
+    private final FileService fileService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -118,6 +120,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         Article article = articleMapper.selectOne(articleQueryWrapper);
 
         Page<CommentResponse> result = commentMapper.selectCommentPage(pageInfo, queryWrapper, article.getCreateUser());
+        for (CommentResponse record : result.getRecords()) {
+            record.setUserAvatar(fileService.getFileToken(record.getUserAvatar()));
+        }
         List<CommentTreeResponse> commentTree = buildCommentTree(result.getRecords());
 
         return Result.success(PageResult.<CommentTreeResponse>builder()
