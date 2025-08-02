@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -93,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
         SysUser user = new SysUser();
         BeanUtils.copyProperties(params, user);
         user.setPassword(passwordEncoder.encode(params.getPassword()));
-        user.setAvatar("BOY_AVATAR_A");
+        user.setAvatar(getRandomAvatar());
         redisTemplate.delete(captchaId);
         userMapper.insert(user);
     }
@@ -256,5 +257,23 @@ public class AuthServiceImpl implements AuthService {
 
         // 返回 Code ID
         return new MailCodeResponse(captchaId);
+    }
+
+    public static String getRandomAvatar() {
+        String[] avatars = {
+                "BOY_AVATAR_A",
+                "BOY_AVATAR_B",
+                "BOY_AVATAR_C",
+                "BOY_AVATAR_D",
+                "BOY_AVATAR_E",
+                "BOY_AVATAR_F",
+                "GIRL_AVATAR_A",
+                "GIRL_AVATAR_B",
+                "GIRL_AVATAR_C",
+                "GIRL_AVATAR_D",
+                "GIRL_AVATAR_E",
+                "GIRL_AVATAR_F"
+        };
+        return avatars[new Random().nextInt(avatars.length)];
     }
 }
