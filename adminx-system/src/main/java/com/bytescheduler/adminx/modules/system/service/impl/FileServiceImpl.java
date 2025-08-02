@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.FileUtils;
+import com.bytescheduler.adminx.common.utils.FileUtil;
 import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.system.entity.SysFileRecord;
 import com.bytescheduler.adminx.modules.system.mapper.FileRecordMapper;
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class FileServiceImpl extends ServiceImpl<FileRecordMapper, SysFileRecord> implements FileService {
 
     private final FileConfig fileConfig;
-    private final FileUtils fileUtils;
+    private final FileUtil fileUtil;
     private final FileRecordMapper fileRecordMapper;
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -55,7 +55,7 @@ public class FileServiceImpl extends ServiceImpl<FileRecordMapper, SysFileRecord
         }
 
         Path savePath = userDir.resolve(fileName);
-        byte[] processedBytes = fileUtils.processFile(file);
+        byte[] processedBytes = fileUtil.processFile(file);
         Files.write(savePath, processedBytes);
 
         SysFileRecord record = new SysFileRecord();

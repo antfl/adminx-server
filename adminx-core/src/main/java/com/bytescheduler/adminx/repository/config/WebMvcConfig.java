@@ -1,5 +1,6 @@
 package com.bytescheduler.adminx.repository.config;
 
+import com.bytescheduler.adminx.common.utils.ClientUtil;
 import com.bytescheduler.adminx.security.RateLimitInterceptor;
 import com.bytescheduler.adminx.security.SignatureInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final RateLimitConfig rateLimitConfig;
+    private final ClientUtil clientUtil;
     private final SignatureConfig signatureConfig;
 
     @Override
@@ -54,6 +56,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(
                 new RateLimitInterceptor(
                         redisTemplate,
+                        clientUtil,
                         rateLimitConfig.getMaxRequests(),
                         rateLimitConfig.getIntervalSeconds(),
                         rateLimitConfig.getBanSeconds()

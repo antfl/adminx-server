@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.bytescheduler.adminx.common.exception.BusinessException;
+import com.bytescheduler.adminx.common.utils.ClientUtil;
 import com.bytescheduler.adminx.common.utils.JwtTokenUtil;
 import com.bytescheduler.adminx.common.utils.MailUtil;
 import com.bytescheduler.adminx.modules.system.dto.request.LoginRequest;
@@ -26,8 +27,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +51,7 @@ public class AuthServiceImpl implements AuthService {
     private final RedisTemplate<String, String> redisTemplate;
     private final CaptchaConfig captchaConfig;
     private final EmailConfig emailConfig;
+    private final ClientUtil clientUtil;
     private final MailUtil mailUtil;
 
     @Override
@@ -134,6 +140,15 @@ public class AuthServiceImpl implements AuthService {
 
         redisTemplate.delete(captchaId);
 
+        // 更新用户信息（最近登录 IP 和最近登录时间）
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(SysUser::getUserId, user.getUserId());
+        String clientRealIp = clientUtil.getClientRealIp(request);
+        updateWrapper.set(StringUtils.isNotBlank(clientRealIp), SysUser::getLastLoginIp, clientRealIp);
+        updateWrapper.set(SysUser::getLastLoginTime, LocalDateTime.now());
+        userMapper.update(null, updateWrapper);
+
         String userId = user.getUserId().toString();
         String token = jwtTokenUtil.generateToken(userId, user.getUserId());
 
@@ -150,7 +165,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void passwordReset(PasswordResetRequest params) {
 
-        if(!Objects.equals(params.getPassword(), params.getConfirmPassword())) {
+        if (!Objects.equals(params.getPassword(), params.getConfirmPassword())) {
             throw new BusinessException("确认密码与设置的密码不一致");
         }
 

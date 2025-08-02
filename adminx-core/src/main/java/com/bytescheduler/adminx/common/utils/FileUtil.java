@@ -19,7 +19,7 @@ import java.util.Set;
  */
 @Slf4j
 @Component
-public class FileUtils {
+public class FileUtil {
 
     private final FileConfig fileConfig;
 
@@ -30,7 +30,7 @@ public class FileUtils {
         add("image/webp");
     }};
 
-    public FileUtils(FileConfig fileConfig) {
+    public FileUtil(FileConfig fileConfig) {
         this.fileConfig = fileConfig;
     }
 
