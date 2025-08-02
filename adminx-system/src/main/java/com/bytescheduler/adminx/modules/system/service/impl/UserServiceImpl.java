@@ -12,9 +12,7 @@ import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.modules.system.dto.request.UpdateUserRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.UserQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.UserRoleRequest;
-import com.bytescheduler.adminx.modules.system.dto.response.UserInfoResponse;
-import com.bytescheduler.adminx.modules.system.dto.response.UserPermissionResponse;
-import com.bytescheduler.adminx.modules.system.dto.response.UserResponse;
+import com.bytescheduler.adminx.modules.system.dto.response.*;
 import com.bytescheduler.adminx.modules.system.entity.SysMenu;
 import com.bytescheduler.adminx.modules.system.entity.SysUser;
 import com.bytescheduler.adminx.modules.system.mapper.MenuMapper;
@@ -29,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -170,6 +169,20 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
                         .setPermissions(permissions)
                         .setMenus(menuTree)
         );
+    }
+
+    @Override
+    public List<RecentUserResponse> getRecentUsers() {
+        LocalDateTime startTime = LocalDateTime.now().minusDays(7);
+        return baseMapper.selectRecentUsers(startTime);
+    }
+
+    @Override
+    public List<ActiveUserResponse> getActiveUsers() {
+        LocalDateTime startTime = LocalDateTime.now().minusDays(7);
+        LocalDateTime endTime = LocalDateTime.now();
+        int limit = 7;
+        return baseMapper.selectActiveUsers(startTime, endTime, limit);
     }
 
     private UserResponse convertResponse(SysUser user) {

@@ -8,4 +8,26 @@
         WHERE username = #{username}
           AND is_deleted = 0
     </select>
+
+    <!-- 最近 7 天新增用户 -->
+    <select id="selectRecentUsers" resultType="com.bytescheduler.adminx.modules.system.dto.response.RecentUserResponse">
+        SELECT nickname, avatar
+        FROM sys_user
+        WHERE create_time >= #{startTime}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 活跃用户统计 -->
+    <select id="selectActiveUsers" resultType="com.bytescheduler.adminx.modules.system.dto.response.ActiveUserResponse">
+        SELECT
+            u.nickname,
+            u.avatar,
+            COUNT(log.id) AS operationCount
+        FROM operation_log log
+                 JOIN sys_user u ON log.operator = u.user_id
+        WHERE log.operation_time BETWEEN #{startTime} AND #{endTime}
+        GROUP BY u.username, u.nickname, u.avatar
+        ORDER BY operationCount DESC
+            LIMIT #{limit}
+    </select>
 </mapper>

@@ -6,9 +6,7 @@ import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.enums.OperationType;
 import com.bytescheduler.adminx.modules.system.dto.request.UpdateUserRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.UserQueryRequest;
-import com.bytescheduler.adminx.modules.system.dto.response.UserInfoResponse;
-import com.bytescheduler.adminx.modules.system.dto.response.UserPermissionResponse;
-import com.bytescheduler.adminx.modules.system.dto.response.UserResponse;
+import com.bytescheduler.adminx.modules.system.dto.response.*;
 import com.bytescheduler.adminx.modules.system.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Api(tags = "用户管理")
 @RestController
@@ -51,5 +50,17 @@ public class UserController {
     @GetMapping("/permissions")
     public Result<UserPermissionResponse> getPermissions() {
         return userService.getPermissions();
+    }
+
+    @GetMapping("/recent")
+    @ApiOperation("获取最近 7 天新增用户")
+    public Result<List<RecentUserResponse>> getRecentUsers() {
+        return Result.success(userService.getRecentUsers());
+    }
+
+    @GetMapping("/active")
+    @ApiOperation("获取活跃用户")
+    public Result<List<ActiveUserResponse>> getActiveUsers() {
+        return Result.success(userService.getActiveUsers());
     }
 }
