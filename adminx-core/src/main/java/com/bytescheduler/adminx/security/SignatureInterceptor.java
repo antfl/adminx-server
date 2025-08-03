@@ -171,7 +171,7 @@ public class SignatureInterceptor implements HandlerInterceptor {
         parts.add("nonce=" + nonce);
         String rawData = String.join("&", parts);
 
-        // 使用推荐的 HmacUtils 方式 - 直接生成十六进制签名
+        // 生成十六进制签名
         return new HmacUtils(HMAC_SHA256, apiSecret.getBytes(StandardCharsets.UTF_8)).hmacHex(rawData.getBytes(StandardCharsets.UTF_8));
     }
 
