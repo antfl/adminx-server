@@ -1,6 +1,7 @@
 package com.bytescheduler.adminx.repository.config;
 
 import com.bytescheduler.adminx.common.utils.ClientUtil;
+import com.bytescheduler.adminx.security.DeviceFingerprintInterceptor;
 import com.bytescheduler.adminx.security.RateLimitInterceptor;
 import com.bytescheduler.adminx.security.SignatureInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -43,24 +44,30 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        // 签名验证拦截器
-        registry.addInterceptor(
-                new SignatureInterceptor(
-                        signatureConfig.getSecretKey(),
-                        signatureConfig.getMaxTimeDiff(),
-                        redisTemplate
-                )
-        ).addPathPatterns("/**").excludePathPatterns("/files/view/**");
+        // 设备指纹拦截
+//        registry.addInterceptor(
+//                new DeviceFingerprintInterceptor(
+//                        redisTemplate,
+//                        clientUtil
+//                )
+//        ).addPathPatterns("/**");
 
         // 限流拦截器
         registry.addInterceptor(
                 new RateLimitInterceptor(
                         redisTemplate,
                         clientUtil,
-                        rateLimitConfig.getMaxRequests(),
-                        rateLimitConfig.getIntervalSeconds(),
-                        rateLimitConfig.getBanSeconds()
+                        rateLimitConfig
                 )
         ).addPathPatterns("/**");
+
+        // 签名验证拦截器
+        registry.addInterceptor(
+                new SignatureInterceptor(
+                        signatureConfig.getMaxTimeDiff(),
+                        signatureConfig.getSecretKey(),
+                        redisTemplate
+                )
+        ).addPathPatterns("/**").excludePathPatterns("/files/view/**");
     }
 }

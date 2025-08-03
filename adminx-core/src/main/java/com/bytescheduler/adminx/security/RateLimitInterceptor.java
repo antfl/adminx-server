@@ -1,8 +1,11 @@
 package com.bytescheduler.adminx.security;
 
 import com.bytescheduler.adminx.common.utils.ClientUtil;
+import com.bytescheduler.adminx.common.utils.ResourceLoader;
+import com.bytescheduler.adminx.repository.config.RateLimitConfig;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.lang.NonNull;
 
@@ -18,55 +21,16 @@ import java.util.concurrent.TimeUnit;
  * @author byte-scheduler
  * @since 2025/7/15
  */
+@RequiredArgsConstructor
 public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final String RATE_LIMIT_KEY_PREFIX = "rate_limit:";
     private static final String BLACKLIST_KEY_PREFIX = "blacklist:";
-    private static final String TOO_MANY_REQUESTS_MSG = "请求过于频繁，请稍后再试";
+    private static final RedisScript<Long> RATE_LIMIT_SCRIPT = ResourceLoader.loadLuaScript("scripts/rate_limit.lua");
 
     private final RedisTemplate<String, String> redisTemplate;
     private final ClientUtil clientUtil;
-    private final int maxRequests;
-    private final long intervalSeconds;
-    private final long banTimeSeconds;
-
-    // Lua 脚本
-    private static final DefaultRedisScript<Long> RATE_LIMIT_SCRIPT = new DefaultRedisScript<>(
-            "local key = KEYS[1]\n" +
-                    "local max = tonumber(ARGV[1])\n" +
-                    "local window = tonumber(ARGV[2])\n" +
-                    "local banTime = tonumber(ARGV[3])\n" +
-                    "\n" +
-                    "local current = redis.call('GET', key)\n" +
-                    "if current and tonumber(current) > max then\n" +
-                    "    return -1 \n" +
-                    "end\n" +
-                    "\n" +
-                    "local count = redis.call('INCR', key)\n" +
-                    "if count == 1 then\n" +
-                    "    redis.call('EXPIRE', key, window)\n" +
-                    "end\n" +
-                    "\n" +
-                    "if count > max then\n" +
-                    "    return -1\n" +
-                    "end\n" +
-                    "return count",
-            Long.class
-    );
-
-    public RateLimitInterceptor(
-            RedisTemplate<String, String> redisTemplate,
-            ClientUtil clientUtil,
-            int maxRequests,
-            long intervalSeconds,
-            long banTimeSeconds
-    ) {
-        this.redisTemplate = redisTemplate;
-        this.clientUtil = clientUtil;
-        this.maxRequests = maxRequests;
-        this.intervalSeconds = intervalSeconds;
-        this.banTimeSeconds = banTimeSeconds;
-    }
+    private final RateLimitConfig rateLimitConfig;
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
@@ -85,7 +49,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
         // 处理限流结果
         if (result != null && result == -1L) {
-            redisTemplate.opsForValue().set(banKey, "banned", banTimeSeconds, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(banKey, "banned", rateLimitConfig.getBanSeconds(), TimeUnit.SECONDS);
             sendErrorResponse(response);
             return false;
         }
@@ -98,9 +62,13 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private void sendErrorResponse(HttpServletResponse response) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.sendError(429, RateLimitInterceptor.TOO_MANY_REQUESTS_MSG);
+        response.setStatus(429);
+        response.setContentType("text/html;charset=UTF-8");
+
+        String htmlResponse = ResourceLoader.loadHtml("html/rate_limit.html").replace("score", "10");
+
+        response.getWriter().write(htmlResponse);
+        response.getWriter().flush();
     }
 
     private Long executeRateLimitScript(String key) {
@@ -108,9 +76,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             return redisTemplate.execute(
                     RATE_LIMIT_SCRIPT,
                     Collections.singletonList(key),
-                    String.valueOf(maxRequests),
-                    String.valueOf(intervalSeconds),
-                    String.valueOf(banTimeSeconds)
+                    String.valueOf(rateLimitConfig.getMaxRequests()),
+                    String.valueOf(rateLimitConfig.getIntervalSeconds()),
+                    String.valueOf(rateLimitConfig.getBanSeconds())
             );
         } catch (Exception e) {
             return null;

@@ -1,21 +1,23 @@
 package com.bytescheduler.adminx.security;
 
+import com.bytescheduler.adminx.common.utils.ResourceLoader;
+import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.lang.NonNull;
-import org.springframework.http.HttpStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 签名验证拦截器
@@ -23,30 +25,41 @@ import java.util.concurrent.TimeUnit;
  * @author byte-scheduler
  * @since 2025/8/1
  */
+@RequiredArgsConstructor
 public class SignatureInterceptor implements HandlerInterceptor {
 
-    private final String apiSecret;
+    private static final String HMAC_SHA256 = HmacAlgorithms.HMAC_SHA_256.getName();
+    private static final String NONCE_PREFIX = "nonce:";
+    private static final int NONCE_TTL_MINUTES = 5;
+    private static final String SIGNATURE_HEADER = "Req-Signature";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private final long maxTimeDiff;
+    private final String apiSecret;
     private final RedisTemplate<String, String> redisTemplate;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public SignatureInterceptor(String apiSecret, long maxTimeDiff, RedisTemplate<String, String> redisTemplate) {
-        this.apiSecret = apiSecret;
-        this.maxTimeDiff = maxTimeDiff;
-        this.redisTemplate = redisTemplate;
-    }
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
 
-        String timestamp = request.getHeader("X-Timestamp");
-        String nonce = request.getHeader("X-Nonce");
-        String signature = request.getHeader("X-Signature");
+        String headerStr = request.getHeader(SIGNATURE_HEADER);
+        if (headerStr == null || headerStr.isEmpty()) {
+            sendError(response, 0);
+            return false;
+        }
+
+        String[] headerArr = headerStr.split("/");
+        if (headerArr.length != 3) {
+            sendError(response, 0);
+            return false;
+        }
+
+        String nonce = headerArr[0];
+        String timestamp = headerArr[1];
+        String signature = headerArr[2];
 
         // 校验请求头
-        if (timestamp == null || nonce == null || signature == null) {
-            sendError(response, HttpStatus.BAD_REQUEST);
+        if (nonce.isEmpty() || timestamp.isEmpty() || signature.isEmpty()) {
+            sendError(response, 1);
             return false;
         }
 
@@ -55,24 +68,24 @@ public class SignatureInterceptor implements HandlerInterceptor {
         try {
             requestTime = Long.parseLong(timestamp);
         } catch (NumberFormatException e) {
-            sendError(response, HttpStatus.BAD_REQUEST);
+            sendError(response, 5);
             return false;
         }
 
         // 请求有效期校验
         if (Math.abs(currentTime - requestTime) > maxTimeDiff) {
-            sendError(response, HttpStatus.UNAUTHORIZED);
+            sendError(response, 10);
             return false;
         }
 
         // Nonce 唯一性校验
-        String nonceKey = "nonce:" + nonce;
+        String nonceKey = NONCE_PREFIX + nonce;
         if (redisTemplate.hasKey(nonceKey)) {
-            sendError(response, HttpStatus.UNAUTHORIZED);
+            sendError(response, 20);
             return false;
         }
-        // 存储 Nonce (5 分钟有效期)
-        redisTemplate.opsForValue().set(nonceKey, "used", 5, TimeUnit.MINUTES);
+        // 存储 Nonce
+        redisTemplate.opsForValue().set(nonceKey, "used", NONCE_TTL_MINUTES, TimeUnit.MINUTES);
 
         // 获取请求参数
         Map<String, String> urlParams = getUrlParams(request);
@@ -81,9 +94,9 @@ public class SignatureInterceptor implements HandlerInterceptor {
         // 生成服务端签名
         String serverSignature = generateSignature(urlParams, bodyParams, requestTime, nonce);
 
-        // 签名比对
-        if (!serverSignature.equals(signature)) {
-            sendError(response, HttpStatus.UNAUTHORIZED);
+        // 安全比较签名（防止时序攻击）
+        if (!MessageDigest.isEqual(signature.getBytes(StandardCharsets.UTF_8), serverSignature.getBytes(StandardCharsets.UTF_8))) {
+            sendError(response, 25);
             return false;
         }
 
@@ -92,14 +105,11 @@ public class SignatureInterceptor implements HandlerInterceptor {
 
     private Map<String, String> getUrlParams(HttpServletRequest request) {
         Map<String, String> params = new HashMap<>();
-        Enumeration<String> paramNames = request.getParameterNames();
-        while (paramNames.hasMoreElements()) {
-            String name = paramNames.nextElement();
-            String[] values = request.getParameterValues(name);
+        request.getParameterMap().forEach((name, values) -> {
             if (values != null && values.length > 0) {
                 params.put(name, normalizeValue(values));
             }
-        }
+        });
         return params;
     }
 
@@ -111,11 +121,10 @@ public class SignatureInterceptor implements HandlerInterceptor {
             if (body.length == 0) return Collections.emptyMap();
 
             try {
-                Map<String, Object> rawMap  = objectMapper.readValue(body, Map.class);
+                Map<String, Object> rawMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {
+                });
                 Map<String, String> result = new HashMap<>();
-                for (Map.Entry<String, Object> entry : rawMap.entrySet()) {
-                    result.put(entry.getKey(), normalizeValue(entry.getValue()));
-                }
+                rawMap.forEach((key, value) -> result.put(key, normalizeValue(value)));
                 return result;
             } catch (IOException e) {
                 return Collections.emptyMap();
@@ -128,30 +137,22 @@ public class SignatureInterceptor implements HandlerInterceptor {
         if (value == null) return "";
         if (value instanceof Object[]) {
             Object[] array = (Object[]) value;
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < array.length; i++) {
-                if (i > 0) sb.append(",");
-                sb.append(array[i] != null ? array[i].toString() : "");
-            }
-            return sb.toString();
+            return Arrays.stream(array)
+                    .map(obj -> obj != null ? obj.toString() : "")
+                    .collect(Collectors.joining(","));
         }
         if (value instanceof Collection) {
             Collection<?> coll = (Collection<?>) value;
-            StringBuilder sb = new StringBuilder();
-            int i = 0;
-            for (Object item : coll) {
-                if (i++ > 0) sb.append(",");
-                sb.append(item != null ? item.toString() : "");
-            }
-            return sb.toString();
+            return coll.stream()
+                    .map(obj -> obj != null ? obj.toString() : "")
+                    .collect(Collectors.joining(","));
         }
         return value.toString();
     }
 
     private String generateSignature(Map<String, String> urlParams, Map<String, String> bodyParams, long timestamp, String nonce) {
         // 合并参数
-        Map<String, String> allParams = new HashMap<>();
-        allParams.putAll(urlParams);
+        Map<String, String> allParams = new HashMap<>(urlParams);
         allParams.putAll(bodyParams);
 
         // 排序参数
@@ -159,11 +160,9 @@ public class SignatureInterceptor implements HandlerInterceptor {
         Collections.sort(sortedKeys);
 
         // 构建参数字符串
-        List<String> paramPairs = new ArrayList<>();
-        for (String key : sortedKeys) {
-            paramPairs.add(key + "=" + allParams.get(key));
-        }
-        String paramString = String.join("&", paramPairs);
+        String paramString = sortedKeys.stream()
+                .map(key -> key + "=" + allParams.get(key))
+                .collect(Collectors.joining("&"));
 
         // 拼接基础数据
         List<String> parts = new ArrayList<>();
@@ -172,35 +171,15 @@ public class SignatureInterceptor implements HandlerInterceptor {
         parts.add("nonce=" + nonce);
         String rawData = String.join("&", parts);
 
-        // 计算 HMAC-SHA256
-        try {
-            Mac sha256 = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKey = new SecretKeySpec(
-                    apiSecret.getBytes(StandardCharsets.UTF_8),
-                    "HmacSHA256"
-            );
-            sha256.init(secretKey);
-            byte[] bytes = sha256.doFinal(rawData.getBytes(StandardCharsets.UTF_8));
-
-            // 转换为十六进制
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : bytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException("签名生成失败", e);
-        }
+        // 使用推荐的 HmacUtils 方式 - 直接生成十六进制签名
+        return new HmacUtils(HMAC_SHA256, apiSecret.getBytes(StandardCharsets.UTF_8)).hmacHex(rawData.getBytes(StandardCharsets.UTF_8));
     }
 
-    private void sendError(HttpServletResponse response, HttpStatus status) throws IOException {
-        response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(status.value());
-        response.getWriter().write(
-                "{\"code\":" + status.value() +
-                        ",\"message\":\"" + "非法请求" + "\"}"
-        );
+    private void sendError(HttpServletResponse response, int score) throws IOException {
+        response.setStatus(500);
+        response.setContentType("text/html;charset=UTF-8");
+        String htmlResponse = ResourceLoader.loadHtml("html/signature.html").replace("score", String.valueOf(score));
+        response.getWriter().write(htmlResponse);
+        response.getWriter().flush();
     }
 }
