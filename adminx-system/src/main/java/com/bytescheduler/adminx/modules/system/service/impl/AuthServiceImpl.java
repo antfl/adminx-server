@@ -17,6 +17,7 @@ import com.bytescheduler.adminx.modules.system.dto.response.CaptchaResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.MailCodeResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.TokenResponse;
 import com.bytescheduler.adminx.modules.system.entity.SysUser;
+import com.bytescheduler.adminx.modules.system.enums.UserStatus;
 import com.bytescheduler.adminx.modules.system.mapper.SysUserMapper;
 import com.bytescheduler.adminx.modules.system.service.AuthService;
 import com.bytescheduler.adminx.repository.config.CaptchaConfig;
@@ -137,6 +138,10 @@ public class AuthServiceImpl implements AuthService {
 
         if (!passwordEncoder.matches(params.getPassword(), user.getPassword())) {
             throw new BusinessException("密码错误");
+        }
+
+        if (user.getStatus() == UserStatus.DISABLED.getCode()) {
+            throw new BusinessException("当前用户已被禁用");
         }
 
         redisTemplate.delete(captchaId);
