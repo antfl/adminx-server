@@ -26,7 +26,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final String RATE_LIMIT_KEY_PREFIX = "rate_limit:";
     private static final String BLACKLIST_KEY_PREFIX = "blacklist:";
-    private static final RedisScript<Long> RATE_LIMIT_SCRIPT = ResourceLoader.loadLuaScript("scripts/rate_limit.lua");
+    private static final RedisScript<Long> RATE_LIMIT_SCRIPT = ResourceLoader.loadLuaScript("scripts/rate_limit.lua", Long.class);
 
     private final RedisTemplate<String, String> redisTemplate;
     private final ClientUtil clientUtil;

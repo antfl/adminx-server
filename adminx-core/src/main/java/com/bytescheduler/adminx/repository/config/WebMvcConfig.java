@@ -1,7 +1,8 @@
 package com.bytescheduler.adminx.repository.config;
 
 import com.bytescheduler.adminx.common.utils.ClientUtil;
-import com.bytescheduler.adminx.security.DeviceFingerprintInterceptor;
+// import com.bytescheduler.adminx.security.DeviceFingerprintInterceptor;
+import com.bytescheduler.adminx.security.EmailRateLimitInterceptor;
 import com.bytescheduler.adminx.security.RateLimitInterceptor;
 import com.bytescheduler.adminx.security.SignatureInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -69,5 +70,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         redisTemplate
                 )
         ).addPathPatterns("/**").excludePathPatterns("/files/view/**");
+
+        // 邮件发送拦截器
+        registry.addInterceptor(
+                new EmailRateLimitInterceptor(
+                        redisTemplate,
+                        clientUtil
+                )
+        ).addPathPatterns("/auth/sendMailCode/**");
     }
 }

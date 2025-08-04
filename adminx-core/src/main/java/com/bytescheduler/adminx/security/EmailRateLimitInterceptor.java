@@ -18,6 +18,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 /**
+ * 邮件发送拦截器
+ *
  * @author byte-scheduler
  * @since 2025/8/3
  */
