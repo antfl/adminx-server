@@ -4,24 +4,31 @@ import com.bytescheduler.adminx.common.exception.InvalidTokenException;
 import com.bytescheduler.adminx.common.exception.TokenExpiredException;
 import com.bytescheduler.adminx.repository.config.JwtConfig;
 import io.jsonwebtoken.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+/**
+ * JWT 令牌工具类，提供令牌的生成、解析和验证功能
+ *
+ * @author byte-scheduler
+ * @since 2025/8/4
+ */
+@RequiredArgsConstructor
 @Component
 public class JwtTokenUtil {
     private final JwtConfig jwtConfig;
 
-    public JwtTokenUtil(JwtConfig jwtConfig) {
-        this.jwtConfig = jwtConfig;
-    }
+    // 用户 ID 字段声明
+    private static final String USER_ID_CLAIM = "userId";
 
     public String generateToken(String username, Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtConfig.getExpiration() * 1000);
 
         return Jwts.builder()
-                .claim("userId", userId)
+                .claim(USER_ID_CLAIM, userId)
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -68,6 +75,6 @@ public class JwtTokenUtil {
                 .parseClaimsJws(token)
                 .getBody();
 
-        return Long.parseLong(claims.get("userId").toString());
+        return Long.parseLong(claims.get(USER_ID_CLAIM).toString());
     }
 }

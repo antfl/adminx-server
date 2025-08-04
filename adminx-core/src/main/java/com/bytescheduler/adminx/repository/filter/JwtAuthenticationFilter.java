@@ -7,6 +7,7 @@ import com.bytescheduler.adminx.common.utils.UserContext;
 import com.bytescheduler.adminx.repository.config.JwtConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,20 +26,24 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
+/**
+ * JWT 认证过滤器，用于处理基于令牌的用户认证。
+ * 该过滤器会拦截请求，从请求头中提取 JWT 令牌并进行验证，包括：
+ * 1. 令牌格式校验
+ * 2. 令牌有效性验证（过期、篡改等）
+ * 3. 与 Redis 存储的令牌比对（防止异地登录）
+ * 验证通过后将用户认证信息存入安全上下文，并设置用户 ID 到线程本地存储。
+ * 若验证失败则返回标准化的错误响应。
+ *
+ * @author byte-scheduler
+ * @since 2025/8/4
+ */
+@RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtConfig jwtConfig;
-
     private final JwtTokenUtil jwtTokenUtil;
-
     private final RedisTemplate<String, String> redisTemplate;
-
-    public JwtAuthenticationFilter(JwtConfig jwtConfig, JwtTokenUtil jwtTokenUtil, RedisTemplate<String, String> redisTemplate) {
-        this.jwtConfig = jwtConfig;
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.redisTemplate = redisTemplate;
-    }
 
     @Override
     protected void doFilterInternal(
@@ -47,84 +52,107 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain chain)
             throws IOException {
         try {
-            // 从请求头获取令牌
-            String header = request.getHeader(jwtConfig.getTokenHeader());
-
-            // 检查令牌是否存在且格式正确
-            if (header != null && header.startsWith(jwtConfig.getTokenPrefix())) {
-                // 提取实际的令牌
-                String authToken = header.substring(jwtConfig.getTokenPrefix().length());
-                try {
-                    // 从令牌中获取用户名（可能抛出 TokenExpiredException 或 InvalidTokenException）
-                    String username = jwtTokenUtil.getUsernameFromToken(authToken);
-
-                    // 验证用户上下文是否已设置
-                    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                        // 从 Redis 获取存储的令牌
-                        String redisToken = redisTemplate.opsForValue().get(username);
-
-                        // 验证 Redis令牌与请求令牌是否匹配
-                        if (redisToken != null && redisToken.equals(authToken)) {
-                            // 验证令牌有效性
-                            if (jwtTokenUtil.validateToken(authToken)) {
-                                // 创建认证对象并设置到安全上下文
-                                UsernamePasswordAuthenticationToken authentication =
-                                        new UsernamePasswordAuthenticationToken(username, null, null);
-                                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                                Long userId = jwtTokenUtil.getUserIdFromToken(authToken);
-                                UserContext.setUserId(userId);
-                            } else {
-                                // 令牌无效
-                                handleError(response, HttpServletResponse.SC_UNAUTHORIZED, "无效凭证", "令牌验证失败");
-                                return;
-                            }
-                        } else {
-                            // Redis中找不到令牌或令牌不匹配
-                            handleError(response, HttpServletResponse.SC_UNAUTHORIZED, "登录失效", "您的账号已在其他地方登录，请重新登录");
-                            return;
-                        }
-                    }
-                } catch (TokenExpiredException ex) {
-                    // 令牌过期处理
-                    handleError(response, HttpServletResponse.SC_UNAUTHORIZED, "登录过期", "登录已过期，请重新登录");
-                    return;
-                } catch (InvalidTokenException ex) {
-                    // 无效令牌处理
-                    handleError(response, HttpServletResponse.SC_UNAUTHORIZED, "无效凭证", "无效的登录凭证");
-                    return;
-                }
+            String authToken = extractToken(request);
+            if (authToken != null) {
+                authenticateToken(request, response, authToken);
             }
-
-            // 继续过滤器链
+            // 继续过滤器链（无论是否有令牌）
             chain.doFilter(request, response);
-
         } catch (Exception ex) {
-            // 全局异常处理
             handleError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "服务器错误", "服务器错误");
+                    "服务器错误", "服务器内部错误");
         } finally {
             UserContext.clear();
         }
     }
 
     /**
-     * 统一错误处理方法
+     * 从请求头中提取 JWT 令牌
      */
-    private void handleError(HttpServletResponse response, int status, String error, String message) throws IOException {
+    private String extractToken(HttpServletRequest request) {
+        String header = request.getHeader(jwtConfig.getTokenHeader());
+        if (header != null && header.startsWith(jwtConfig.getTokenPrefix())) {
+            return header.substring(jwtConfig.getTokenPrefix().length());
+        }
+        return null;
+    }
+
+    /**
+     * 用户认证
+     */
+    private void authenticateToken(HttpServletRequest request,
+                                   HttpServletResponse response,
+                                   String authToken) throws IOException {
+        try {
+            String username = jwtTokenUtil.getUsernameFromToken(authToken);
+            if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
+                // 无用户名或已认证则跳过
+                return;
+            }
+
+            String redisToken = redisTemplate.opsForValue().get(username);
+            if (redisToken == null) {
+                handleError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                        "登录失效", "您的账号已在其他地方登录，请重新登录");
+                return;
+            }
+
+            if (!redisToken.equals(authToken)) {
+                handleError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                        "登录失效", "您的账号已在其他地方登录，请重新登录");
+                return;
+            }
+
+            if (!jwtTokenUtil.validateToken(authToken)) {
+                handleError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                        "无效凭证", "令牌验证失败");
+                return;
+            }
+
+            setSecurityContext(request, username, authToken);
+        } catch (TokenExpiredException ex) {
+            handleError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "登录过期", "登录已过期，请重新登录");
+        } catch (InvalidTokenException ex) {
+            handleError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "无效凭证", "无效的登录凭证");
+        }
+    }
+
+    /**
+     * 设置安全上下文和用户上下文
+     */
+    private void setSecurityContext(HttpServletRequest request,
+                                    String username,
+                                    String authToken) {
+        // 创建认证对象
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(username, null, null);
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        // 设置安全上下文
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // 设置用户 ID 到线程本地
+        Long userId = jwtTokenUtil.getUserIdFromToken(authToken);
+        UserContext.setUserId(userId);
+    }
+
+    /**
+     * 统一错误响应处理
+     */
+    private void handleError(HttpServletResponse response, int status,
+                             String error, String message) throws IOException {
         response.setStatus(status);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        // 错误响应
         Map<String, Object> errorResponse = new LinkedHashMap<>();
         errorResponse.put("timestamp", new Date());
         errorResponse.put("status", status);
         errorResponse.put("error", error);
         errorResponse.put("message", message);
 
-        // 写入响应
         try (PrintWriter writer = response.getWriter()) {
             writer.write(new ObjectMapper().writeValueAsString(errorResponse));
             writer.flush();
