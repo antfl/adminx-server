@@ -1,6 +1,6 @@
 package com.bytescheduler.adminx.security;
 
-import com.bytescheduler.adminx.common.utils.ClientUtil;
+import com.bytescheduler.adminx.common.utils.HttpRequestIpResolver;
 import com.bytescheduler.adminx.common.utils.JsonUtil;
 import com.bytescheduler.adminx.common.utils.ResourceLoader;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class DeviceFingerprintInterceptor implements HandlerInterceptor {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final ClientUtil clientUtil;
+    private final HttpRequestIpResolver ipResolver;
 
     // 签名密钥
     private static final String SIGN_SECRET = "8D7F2A9C4E5B1F3A6C9D2E8F7B1A5C3D";
@@ -50,16 +50,16 @@ public class DeviceFingerprintInterceptor implements HandlerInterceptor {
     // IP 哈希盐值
     private static final String SALT = "7E3A5F8C2B1D9E4F";
 
-    public DeviceFingerprintInterceptor(RedisTemplate<String, String> redisTemplate, ClientUtil clientUtil) {
+    public DeviceFingerprintInterceptor(RedisTemplate<String, String> redisTemplate, HttpRequestIpResolver ipResolver) {
         this.redisTemplate = redisTemplate;
-        this.clientUtil = clientUtil;
+        this.ipResolver = ipResolver;
     }
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
 
         // 获取客户端 IP
-        String clientIp = clientUtil.getClientRealIp(request);
+        String clientIp = ipResolver.resolve(request);
 
         // 从请求头获取设备指纹相关信息
         String headerStr = request.getHeader("Req-Device-Fingerprint");

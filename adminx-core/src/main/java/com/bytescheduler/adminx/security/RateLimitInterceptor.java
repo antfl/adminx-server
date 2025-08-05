@@ -1,6 +1,6 @@
 package com.bytescheduler.adminx.security;
 
-import com.bytescheduler.adminx.common.utils.ClientUtil;
+import com.bytescheduler.adminx.common.utils.HttpRequestIpResolver;
 import com.bytescheduler.adminx.common.utils.ResourceLoader;
 import com.bytescheduler.adminx.repository.config.RateLimitConfig;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +29,12 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private static final RedisScript<Long> RATE_LIMIT_SCRIPT = ResourceLoader.loadLuaScript("scripts/rate_limit.lua", Long.class);
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final ClientUtil clientUtil;
+    private final HttpRequestIpResolver ipResolver;
     private final RateLimitConfig rateLimitConfig;
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
-        String clientIp = clientUtil.getClientRealIp(request);
+        String clientIp = ipResolver.resolve(request);
         String banKey = BLACKLIST_KEY_PREFIX + clientIp;
 
         // 检查全局黑名单

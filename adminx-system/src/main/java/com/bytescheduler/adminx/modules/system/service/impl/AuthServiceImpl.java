@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.ClientUtil;
+import com.bytescheduler.adminx.common.utils.HttpRequestIpResolver;
 import com.bytescheduler.adminx.common.utils.JwtTokenUtil;
 import com.bytescheduler.adminx.common.utils.MailUtil;
 import com.bytescheduler.adminx.modules.system.dto.request.LoginRequest;
@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private final RedisTemplate<String, String> redisTemplate;
     private final CaptchaConfig captchaConfig;
     private final EmailConfig emailConfig;
-    private final ClientUtil clientUtil;
+    private final HttpRequestIpResolver ipResolver;
     private final MailUtil mailUtil;
 
     @Override
@@ -150,7 +150,7 @@ public class AuthServiceImpl implements AuthService {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SysUser::getUserId, user.getUserId());
-        String clientRealIp = clientUtil.getClientRealIp(request);
+        String clientRealIp = ipResolver.resolve(request);
         updateWrapper.set(StringUtils.isNotBlank(clientRealIp), SysUser::getLastLoginIp, clientRealIp);
         updateWrapper.set(SysUser::getLastLoginTime, LocalDateTime.now());
         userMapper.update(null, updateWrapper);

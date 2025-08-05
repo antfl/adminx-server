@@ -1,7 +1,8 @@
 package com.bytescheduler.adminx.repository.config;
 
-import com.bytescheduler.adminx.common.utils.ClientUtil;
-// import com.bytescheduler.adminx.security.DeviceFingerprintInterceptor;
+import com.bytescheduler.adminx.common.utils.HttpRequestIpResolver;
+//import com.bytescheduler.adminx.security.DeviceFingerprintInterceptor;
+import com.bytescheduler.adminx.security.CodeRateLimitInterceptor;
 import com.bytescheduler.adminx.security.EmailRateLimitInterceptor;
 import com.bytescheduler.adminx.security.RateLimitInterceptor;
 import com.bytescheduler.adminx.security.SignatureInterceptor;
@@ -22,7 +23,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final RateLimitConfig rateLimitConfig;
-    private final ClientUtil clientUtil;
+    private final HttpRequestIpResolver ipResolver;
     private final SignatureConfig signatureConfig;
 
     @Override
@@ -45,22 +46,22 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        // 设备指纹拦截
-//        registry.addInterceptor(
-//                new DeviceFingerprintInterceptor(
-//                        redisTemplate,
-//                        clientUtil
-//                )
-//        ).addPathPatterns("/**");
-
         // 限流拦截器
         registry.addInterceptor(
                 new RateLimitInterceptor(
                         redisTemplate,
-                        clientUtil,
+                        ipResolver,
                         rateLimitConfig
                 )
         ).addPathPatterns("/**");
+
+        // 设备指纹拦截
+//        registry.addInterceptor(
+//                new DeviceFingerprintInterceptor(
+//                        redisTemplate,
+//                        ipResolver
+//                )
+//        ).addPathPatterns("/**");
 
         // 签名验证拦截器
         registry.addInterceptor(
@@ -75,8 +76,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(
                 new EmailRateLimitInterceptor(
                         redisTemplate,
-                        clientUtil
+                        ipResolver
                 )
         ).addPathPatterns("/auth/sendMailCode/**");
+
+        // 验证码发送拦截器
+        registry.addInterceptor(
+                new CodeRateLimitInterceptor(
+                        redisTemplate,
+                        ipResolver
+                )
+        ).addPathPatterns("/auth/captcha");
     }
 }

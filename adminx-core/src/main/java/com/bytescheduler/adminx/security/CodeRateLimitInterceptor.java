@@ -18,17 +18,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 /**
- * 邮件发送拦截器
+ * 验证码发送拦截器
  *
  * @author byte-scheduler
  * @since 2025/8/3
  */
 @Component
 @RequiredArgsConstructor
-public class EmailRateLimitInterceptor implements HandlerInterceptor {
+public class CodeRateLimitInterceptor implements HandlerInterceptor {
 
-    private static final String EMAIL_RATE_LIMIT_KEY_PREFIX = "email_limit:";
-    private static final int MAX_DAILY_EMAILS = 3;
+    private static final String EMAIL_RATE_LIMIT_KEY_PREFIX = "code_limit:";
+    private static final int MAX_DAILY_EMAILS = 20;
     private static final long KEY_EXPIRE_HOURS = 24;
     private static final RedisScript<Boolean> EMAIL_LIMIT_SCRIPT = ResourceLoader.loadLuaScript("scripts/email_limit.lua", Boolean.class);
 
