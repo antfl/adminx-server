@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
-import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.system.dto.request.UpdateUserRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.UserQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.UserRoleRequest;
@@ -48,7 +48,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     public Result<String> updateUser(UpdateUserRequest params) {
         SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getUserId, params.getUserId()));
-        if (!Objects.equals(user.getUserId(), UserContext.getCurrentUserId())) {
+        if (!Objects.equals(user.getUserId(), UserContextHolder.get())) {
             return Result.failed("无该操作权限");
         }
 
@@ -119,7 +119,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     @Override
     public Result<UserInfoResponse> getUserInfo() {
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysUser::getUserId, UserContext.getCurrentUserId());
+        wrapper.eq(SysUser::getUserId, UserContextHolder.get());
 
         SysUser user = sysUserMapper.selectOne(wrapper);
 
@@ -135,7 +135,7 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
 
     @Override
     public Result<UserPermissionResponse> getPermissions() {
-        Long userId = UserContext.getCurrentUserId();
+        Long userId = UserContextHolder.get();
 
         // 获取用户角色 ID 列表
         List<Long> roleIds = userRoleMapper.selectRoleIdsByUserId(userId);

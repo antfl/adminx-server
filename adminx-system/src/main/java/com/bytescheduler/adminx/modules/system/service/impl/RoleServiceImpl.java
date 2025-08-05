@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
+import com.bytescheduler.adminx.common.utils.crypto.SqlEscapeUtil;
 import com.bytescheduler.adminx.modules.system.dto.request.RolePermissionsRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RoleQueryRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RoleRequest;

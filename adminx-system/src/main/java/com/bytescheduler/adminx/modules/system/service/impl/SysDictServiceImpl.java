@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
-import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
-import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.common.utils.crypto.SqlEscapeUtil;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.system.dto.request.DictPageRequest;
 import com.bytescheduler.adminx.modules.system.entity.SysDict;
 import com.bytescheduler.adminx.modules.system.entity.SysDictItem;
@@ -40,7 +40,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
         boolean isInsert = dict.getId() == null;
 
         long count = baseMapper.selectCount(new LambdaQueryWrapper<SysDict>()
-                .eq(SysDict::getCreateUser, UserContext.getCurrentUserId())
+                .eq(SysDict::getCreateUser, UserContextHolder.get())
         );
 
         if (isInsert && count >= 5) {
@@ -51,7 +51,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
             this.save(dict);
         } else {
             SysDict sysDict = this.getById(dict.getId());
-            if (!Objects.equals(sysDict.getCreateUser(), UserContext.getCurrentUserId())) {
+            if (!Objects.equals(sysDict.getCreateUser(), UserContextHolder.get())) {
                 return Result.failed("无该操作权限");
             }
             this.updateById(dict);
@@ -66,7 +66,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     public Result<Void> deleteDict(Long id) {
         SysDict sysDict = this.getById(id);
 
-        if (!Objects.equals(sysDict.getCreateUser(), UserContext.getCurrentUserId())) {
+        if (!Objects.equals(sysDict.getCreateUser(), UserContextHolder.get())) {
             return Result.failed("无该操作权限");
         }
         return this.removeById(id) ?

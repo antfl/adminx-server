@@ -11,7 +11,7 @@ import com.bytescheduler.adminx.common.dto.response.OperationLogResponse;
 import com.bytescheduler.adminx.common.entity.OperationLog;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
-import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
+import com.bytescheduler.adminx.common.utils.crypto.SqlEscapeUtil;
 import com.bytescheduler.adminx.repository.mapper.OperationLogMapper;
 import com.bytescheduler.adminx.repository.service.OperationLogRepository;
 import com.bytescheduler.adminx.repository.service.OperationLogService;

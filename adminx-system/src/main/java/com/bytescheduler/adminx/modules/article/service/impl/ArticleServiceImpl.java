@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleQueryRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleSaveRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse;
@@ -40,7 +40,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         boolean isInsert = params.getArticleId() == null;
 
-        long count = baseMapper.selectCount(new LambdaQueryWrapper<Article>().eq(Article::getCreateUser, UserContext.getCurrentUserId()));
+        long count = baseMapper.selectCount(new LambdaQueryWrapper<Article>().eq(Article::getCreateUser, UserContextHolder.get()));
         if (isInsert && count >= 50) {
             return Result.failed("每个用户最多可以新建 50 个文章");
         }
@@ -53,7 +53,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             this.save(article);
         } else {
             Article data = this.getById(params.getArticleId());
-            if (!Objects.equals(data.getCreateUser(), UserContext.getCurrentUserId())) {
+            if (!Objects.equals(data.getCreateUser(), UserContextHolder.get())) {
                 throw new BusinessException("无该操作权限");
             }
             this.updateById(article);
@@ -67,7 +67,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public Result<String> deleteArticle(Long id) {
         Article article = this.getById(id);
 
-        Long currentUserId = UserContext.getCurrentUserId();
+        Long currentUserId = UserContextHolder.get();
 
         if (!Objects.equals(article.getCreateUser(), currentUserId)) {
             return Result.failed("无该操作权限");
@@ -94,7 +94,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public ArticleDetailResponse getArticleDetailById(Long id) {
-        Long currentUserId = UserContext.getCurrentUserId();
+        Long currentUserId = UserContextHolder.get();
         ArticleDetailResponse res = articleMapper.selectArticleDetailById(id, currentUserId);
         res.setAvatar(fileService.getFileToken(res.getAvatar()));
         return res;

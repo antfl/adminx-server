@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryCreateRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.ArticleCategoryRequest;
 import com.bytescheduler.adminx.modules.article.dto.response.CategoryResponse;
@@ -41,7 +41,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
 
         boolean isInsert = params.getCategoryId() == null;
 
-        long count = baseMapper.selectCount(new LambdaQueryWrapper<ArticleCategory>().eq(ArticleCategory::getCreateUser, UserContext.getCurrentUserId()));
+        long count = baseMapper.selectCount(new LambdaQueryWrapper<ArticleCategory>().eq(ArticleCategory::getCreateUser, UserContextHolder.get()));
         if (isInsert && count >= 3) {
             return Result.failed("每个用户最多可以新建 3 个分类");
         }
@@ -66,7 +66,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             this.save(articleCategory);
         } else {
             ArticleCategory category = this.getById(params.getCategoryId());
-            if (!Objects.equals(category.getCreateUser(), UserContext.getCurrentUserId())) {
+            if (!Objects.equals(category.getCreateUser(), UserContextHolder.get())) {
                 throw new BusinessException("无该操作权限");
             }
             this.updateById(articleCategory);
@@ -88,7 +88,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
         }
 
         ArticleCategory category = this.getById(id);
-        if (!Objects.equals(category.getCreateUser(), UserContext.getCurrentUserId())) {
+        if (!Objects.equals(category.getCreateUser(), UserContextHolder.get())) {
             return Result.failed("无该操作权限");
         }
 

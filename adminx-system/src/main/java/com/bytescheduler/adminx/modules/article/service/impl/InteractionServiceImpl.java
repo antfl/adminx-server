@@ -3,7 +3,7 @@ package com.bytescheduler.adminx.modules.article.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.Result;
-import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.article.entity.Interaction;
 import com.bytescheduler.adminx.modules.article.mapper.InteractionMapper;
 import com.bytescheduler.adminx.modules.article.service.ArticleService;
@@ -25,7 +25,7 @@ public class InteractionServiceImpl extends ServiceImpl<InteractionMapper, Inter
     @Transactional
     public Result<String> toggleInteraction(Interaction interaction) {
 
-        Long currentUserId = UserContext.getCurrentUserId();
+        Long currentUserId = UserContextHolder.get();
 
         if (!"like".equals(interaction.getType()) && !"favorite".equals(interaction.getType())) {
             return Result.failed("无效的互动类型");

@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
-import com.bytescheduler.adminx.common.utils.SqlEscapeUtil;
-import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.common.utils.crypto.SqlEscapeUtil;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.system.dto.request.DictItemPageRequest;
 import com.bytescheduler.adminx.modules.system.entity.SysDict;
 import com.bytescheduler.adminx.modules.system.entity.SysDictItem;
@@ -38,7 +38,7 @@ public class SysDictItemServiceImpl extends ServiceImpl<SysDictItemMapper, SysDi
         boolean isInsert = dictItem.getId() == null;
 
         long count = baseMapper.selectCount(new LambdaQueryWrapper<SysDictItem>()
-                .eq(SysDictItem::getCreateUser, UserContext.getCurrentUserId())
+                .eq(SysDictItem::getCreateUser, UserContextHolder.get())
                 .eq(SysDictItem::getDictId, dictItem.getDictId())
         );
 
@@ -49,13 +49,13 @@ public class SysDictItemServiceImpl extends ServiceImpl<SysDictItemMapper, SysDi
         if (isInsert) {
 
             SysDict sysDict = sysDictMapper.selectById(dictItem.getDictId());
-            if (!Objects.equals(sysDict.getCreateUser(), UserContext.getCurrentUserId())) {
+            if (!Objects.equals(sysDict.getCreateUser(), UserContextHolder.get())) {
                 return Result.failed("无该操作权限");
             }
             this.save(dictItem);
         } else {
             SysDictItem sysDictItem = this.getById(dictItem.getId());
-            if (!Objects.equals(sysDictItem.getCreateUser(), UserContext.getCurrentUserId())) {
+            if (!Objects.equals(sysDictItem.getCreateUser(), UserContextHolder.get())) {
                 return Result.failed("无该操作权限");
             }
             this.updateById(dictItem);
@@ -68,7 +68,7 @@ public class SysDictItemServiceImpl extends ServiceImpl<SysDictItemMapper, SysDi
     @Override
     public Result<Void> deleteDictData(Long id) {
         SysDictItem sysDictItem = this.getById(id);
-        if (!Objects.equals(sysDictItem.getCreateUser(), UserContext.getCurrentUserId())) {
+        if (!Objects.equals(sysDictItem.getCreateUser(), UserContextHolder.get())) {
             return Result.failed("无该操作权限");
         }
         return this.removeById(id) ? Result.success() : Result.failed("删除失败");

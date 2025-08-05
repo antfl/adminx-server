@@ -5,12 +5,12 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.FileUtil;
-import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.common.utils.file.FileUtil;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.system.entity.SysFileRecord;
 import com.bytescheduler.adminx.modules.system.mapper.FileRecordMapper;
 import com.bytescheduler.adminx.modules.system.service.FileService;
-import com.bytescheduler.adminx.repository.config.FileConfig;
+import com.bytescheduler.adminx.config.FileConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,7 +45,7 @@ public class FileServiceImpl extends ServiceImpl<FileRecordMapper, SysFileRecord
     public String uploadFile(MultipartFile file) throws IOException {
         String originalFilename = file.getOriginalFilename();
         String fileExt = StrUtil.subAfter(originalFilename, ".", true);
-        Long userId = UserContext.getCurrentUserId();
+        Long userId = UserContextHolder.get();
         String fileName = IdUtil.fastSimpleUUID() + "." + fileExt;
 
         Path userDir = Paths.get(fileConfig.getUploadDir(), userId.toString());

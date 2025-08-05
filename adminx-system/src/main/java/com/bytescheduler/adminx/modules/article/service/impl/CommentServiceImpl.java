@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.exception.BusinessException;
-import com.bytescheduler.adminx.common.utils.UserContext;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.article.dto.request.CommentCreateRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.CommentQueryRequest;
 import com.bytescheduler.adminx.modules.article.dto.request.CommentUpdateRequest;
@@ -42,7 +42,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     public boolean saveComment(CommentCreateRequest params) {
 
         long count = baseMapper.selectCount(new LambdaQueryWrapper<Comment>()
-                .eq(Comment::getCreateUser, UserContext.getCurrentUserId())
+                .eq(Comment::getCreateUser, UserContextHolder.get())
                 .eq(Comment::getArticleId, params.getArticleId())
         );
 
@@ -78,7 +78,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         queryWrapper.eq(Comment::getCommentId, id);
         Comment comment = this.getOne(queryWrapper);
 
-        Long currentUserId = UserContext.getCurrentUserId();
+        Long currentUserId = UserContextHolder.get();
         if (!Objects.equals(comment.getCreateUser(), currentUserId)) {
             throw new BusinessException("只允许删除自己的评论");
         }
@@ -95,7 +95,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         queryWrapper.eq(Comment::getCommentId, params.getId());
         Comment comment = this.getOne(queryWrapper);
 
-        Long currentUserId = UserContext.getCurrentUserId();
+        Long currentUserId = UserContextHolder.get();
         if (!Objects.equals(comment.getCreateUser(), currentUserId)) {
             throw new BusinessException("只允许修改自己的评论");
         }
