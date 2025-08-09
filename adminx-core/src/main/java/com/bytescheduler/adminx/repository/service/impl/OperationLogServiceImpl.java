@@ -8,7 +8,7 @@ import com.bytescheduler.adminx.common.dto.request.LogPageRequest;
 import com.bytescheduler.adminx.common.dto.response.DailyStatResponse;
 import com.bytescheduler.adminx.common.dto.response.ModuleStatResponse;
 import com.bytescheduler.adminx.common.dto.response.OperationLogResponse;
-import com.bytescheduler.adminx.common.entity.OperationLog;
+import com.bytescheduler.adminx.common.entity.SysOperationLog;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.common.utils.crypto.SqlEscapeUtil;
@@ -29,26 +29,26 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 @Service
-public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, OperationLog> implements  OperationLogService {
+public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, SysOperationLog> implements  OperationLogService {
 
     private final OperationLogRepository logRepository;
     private final OperationLogMapper logMapper;
 
     @Override
-    public void saveLog(OperationLog log) {
+    public void saveLog(SysOperationLog log) {
         logRepository.save(log);
     }
 
     @Override
     public Result<PageResult<OperationLogResponse>> pageQuery(LogPageRequest params) {
 
-        Page<OperationLog> page = Page.of(params.getCurrent(), params.getSize());
-        LambdaQueryWrapper<OperationLog> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.isNotBlank(params.getOperator()), OperationLog::getOperator, SqlEscapeUtil.escapeLike(params.getOperator()))
-                .eq(params.getModule() != null, OperationLog::getModule, params.getModule()
-                ).orderByDesc(OperationLog::getOperationTime);
+        Page<SysOperationLog> page = Page.of(params.getCurrent(), params.getSize());
+        LambdaQueryWrapper<SysOperationLog> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.isNotBlank(params.getOperator()), SysOperationLog::getOperator, SqlEscapeUtil.escapeLike(params.getOperator()))
+                .eq(params.getModule() != null, SysOperationLog::getModule, params.getModule()
+                ).orderByDesc(SysOperationLog::getOperationTime);
 
-        Page<OperationLog> result = this.page(page, wrapper);
+        Page<SysOperationLog> result = this.page(page, wrapper);
 
         List<OperationLogResponse> records = new ArrayList<>();
         result.getRecords().forEach(record -> {

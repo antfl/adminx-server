@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * @author byte-scheduler
@@ -30,7 +30,7 @@ public class OperationLogResponse {
 
     @ApiModelProperty(value = "操作时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date operationTime;
+    private LocalDateTime operationTime;
 
     @ApiModelProperty(value = "耗时")
     private Long duration;

@@ -23,7 +23,7 @@
             u.nickname,
             u.avatar,
             COUNT(log.id) AS operationCount
-        FROM operation_log log
+        FROM sys_operation_log log
                  JOIN sys_user u ON log.operator = u.user_id
         WHERE log.operation_time BETWEEN #{startTime} AND #{endTime}
         GROUP BY u.username, u.nickname, u.avatar

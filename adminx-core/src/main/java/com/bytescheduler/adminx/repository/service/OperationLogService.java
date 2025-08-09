@@ -7,7 +7,7 @@ import com.bytescheduler.adminx.common.dto.response.ModuleStatResponse;
 import com.bytescheduler.adminx.common.dto.response.OperationLogResponse;
 import com.bytescheduler.adminx.common.entity.PageResult;
 import com.bytescheduler.adminx.common.entity.Result;
-import com.bytescheduler.adminx.common.entity.OperationLog;
+import com.bytescheduler.adminx.common.entity.SysOperationLog;
 
 import java.util.List;
 
@@ -15,9 +15,9 @@ import java.util.List;
  * @author byte-scheduler
  * @since 2025/6/8
  */
-public interface OperationLogService extends IService<OperationLog> {
+public interface OperationLogService extends IService<SysOperationLog> {
 
-    void saveLog(OperationLog log);
+    void saveLog(SysOperationLog log);
 
     Result<PageResult<OperationLogResponse>> pageQuery(LogPageRequest params);
 

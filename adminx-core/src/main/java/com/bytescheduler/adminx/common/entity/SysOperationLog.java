@@ -1,11 +1,12 @@
 package com.bytescheduler.adminx.common.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 系统操作日志
@@ -15,8 +16,8 @@ import java.util.Date;
  */
 @Data
 @Entity
-@TableName("operation_log")
-public class OperationLog {
+@TableName("sys_operation_log")
+public class SysOperationLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,9 +38,8 @@ public class OperationLog {
     @TableField("request_method")
     private String requestMethod;
 
-    @TableField("operation_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date operationTime;
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime operationTime;
 
     private Long duration;
 

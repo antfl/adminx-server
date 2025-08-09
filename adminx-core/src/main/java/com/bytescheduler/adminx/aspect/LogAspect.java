@@ -1,7 +1,7 @@
 package com.bytescheduler.adminx.aspect;
 
 import com.bytescheduler.adminx.annotation.Log;
-import com.bytescheduler.adminx.common.entity.OperationLog;
+import com.bytescheduler.adminx.common.entity.SysOperationLog;
 import com.bytescheduler.adminx.repository.service.OperationLogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -17,7 +17,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 操作日志切面
@@ -44,7 +44,7 @@ public class LogAspect {
 
     @Around("logPointCut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
-        OperationLog log = new OperationLog();
+        SysOperationLog log = new SysOperationLog();
         long beginTime = System.currentTimeMillis();
         Object result = null;
         Throwable exception = null;
@@ -62,12 +62,12 @@ public class LogAspect {
         return result;
     }
 
-    private void saveLog(ProceedingJoinPoint joinPoint, long duration, Object result, Throwable exception, OperationLog log) {
+    private void saveLog(ProceedingJoinPoint joinPoint, long duration, Object result, Throwable exception, SysOperationLog log) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
         log.setDuration(duration);
-        log.setOperationTime(new Date());
+        log.setOperationTime(LocalDateTime.now());
 
         // 从注解获取操作信息
         Log logAnnotation = method.getAnnotation(Log.class);
