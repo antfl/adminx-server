@@ -2,15 +2,16 @@ package com.bytescheduler.adminx.modules.system.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Data
 @TableName("sys_user")
+@Accessors(chain = true)
 public class SysUser {
 
     /**
@@ -19,6 +20,11 @@ public class SysUser {
     @Id
     @TableId(type = IdType.AUTO)
     private Long userId;
+
+    /**
+     * 用户唯一标识
+     */
+    private String openId;
 
     /**
      * 用户部门 ID
@@ -73,7 +79,7 @@ public class SysUser {
     /**
      * 最后登录时间
      */
-    private Date lastLoginTime;
+    private LocalDateTime lastLoginTime;
 
     /**
      * 创建人
