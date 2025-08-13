@@ -10,5 +10,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class TokenResponse {
+
+    /**
+     * 用户 TOKEN
+     */
     private String token;
 }

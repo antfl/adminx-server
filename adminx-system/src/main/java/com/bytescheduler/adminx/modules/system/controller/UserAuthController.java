@@ -10,20 +10,28 @@ import com.bytescheduler.adminx.modules.system.dto.response.CaptchaResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.MailCodeResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.TokenResponse;
 import com.bytescheduler.adminx.modules.system.service.AuthService;
+import com.bytescheduler.adminx.modules.system.service.QQAuthService;
+import com.bytescheduler.adminx.modules.system.utils.AuthUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
 @Api(tags = "权限控制")
 public class UserAuthController {
 
+    private final AuthUtil authUtil;
     private final AuthService authService;
+    private final QQAuthService qqAuthService;
 
     @ApiOperation("用户注册")
     @Log(module = "用户注册", type = OperationType.USER_REGISTER, value = "用户注册")
@@ -38,6 +46,14 @@ public class UserAuthController {
     @PostMapping("/login")
     public Result<TokenResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         return Result.success(authService.login(loginRequest));
+    }
+
+    @ApiOperation("用户退出登录")
+    @Log(module = "用户退出登录", type = OperationType.USER_LOGIN, value = "用户登录")
+    @PostMapping("/logout")
+    public Result<Void> logout() {
+        authUtil.logout();
+        return Result.success();
     }
 
     @ApiOperation("修改密码")
@@ -60,5 +76,18 @@ public class UserAuthController {
     @GetMapping("/sendMailCode/{mail}/{type}")
     public Result<MailCodeResponse> getMailCaptcha(@Valid @PathVariable String mail, @PathVariable String type) {
         return Result.success(authService.generateMailCode(mail, type));
+    }
+
+    @ApiOperation("QQ 登录")
+    @PostMapping("/qq")
+    public Result<TokenResponse> qqLogin(@RequestBody Map<String, String> params, HttpServletRequest request) {
+        String code = params.get("code");
+        return Result.success(qqAuthService.qqLogin(code, request));
+    }
+
+    @ApiOperation("获取用户 IP 状态是否异常")
+    @GetMapping("/ip-ban-status")
+    public Map<String, Object> checkIpBanStatus(HttpServletRequest request) {
+        return authService.checkIpBanStatus(request);
     }
 }

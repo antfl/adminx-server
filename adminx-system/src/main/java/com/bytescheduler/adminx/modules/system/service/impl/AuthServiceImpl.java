@@ -10,6 +10,7 @@ import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.http.HttpRequestIpResolver;
 import com.bytescheduler.adminx.common.utils.security.JwtTokenUtil;
 import com.bytescheduler.adminx.common.utils.email.MailUtil;
+import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.system.dto.request.LoginRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.PasswordResetRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RegisterRequest;
@@ -22,6 +23,7 @@ import com.bytescheduler.adminx.modules.system.mapper.SysUserMapper;
 import com.bytescheduler.adminx.modules.system.service.AuthService;
 import com.bytescheduler.adminx.config.CaptchaConfig;
 import com.bytescheduler.adminx.config.EmailConfig;
+import com.bytescheduler.adminx.modules.system.utils.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -34,9 +36,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,6 +47,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private static final String BLACKLIST_KEY_PREFIX = "blacklist:";
+
     private final SysUserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
@@ -55,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailConfig emailConfig;
     private final HttpRequestIpResolver ipResolver;
     private final MailUtil mailUtil;
+    private final AuthUtil authUtil;
 
     @Override
     @Transactional
@@ -262,6 +265,38 @@ public class AuthServiceImpl implements AuthService {
 
         // 返回 Code ID
         return new MailCodeResponse(captchaId);
+    }
+
+    @Override
+    public Map<String, Object> checkIpBanStatus(HttpServletRequest request) {
+        String IP = ipResolver.resolve(request);
+        String banKey = BLACKLIST_KEY_PREFIX + IP;
+        boolean isBanned = redisTemplate.hasKey(banKey);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isBanned", isBanned);
+
+        if (isBanned) {
+            Long userId = UserContextHolder.get();
+            // 如果当前是登录状态，禁用当前用户
+            if (userId != null) {
+                disableUserAndClearToken(userId);
+            }
+        }
+        return response;
+    }
+
+    /**
+     * 禁用用户
+     */
+    private void disableUserAndClearToken(Long userId) {
+        LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(SysUser::getUserId, userId)
+                .set(SysUser::getStatus, UserStatus.DISABLED.getCode());
+        userMapper.update(null, updateWrapper);
+
+        // 退出登录
+        authUtil.logout();
     }
 
     public static String getRandomAvatar() {

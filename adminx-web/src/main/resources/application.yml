@@ -102,11 +102,20 @@ captcha:
 # 服务限流配置
 rate:
   limit:
-    max-requests: 300 # 单位时间内最多连接次数
-    interval-seconds: 1800 # 30（分钟）为一个单位
-    ban-seconds: 86400 # 封禁时间（秒）
+    max-requests: 15 # 单位时间内最多连接次数
+    interval-seconds: 20 # 20（秒）为一个单位
+    ban-seconds: 1800 # 封禁时间（秒）
 
 # 接口签名配置
 signature:
   max-time-diff: 10000 # 签名有效期 10 秒
   secret-key: 8D7F2A9C4E5B1F3A6C9D2E8F7B1A5C3D
+
+# QQ 登录配置
+qq:
+  app-id: 102805332 # APP ID
+  app-key:
+  redirect-uri: https://byteout.cn/login
+  access-token-url: https://graph.qq.com/oauth2.0/token
+  openid-url: https://graph.qq.com/oauth2.0/me
+  user-info-url: https://graph.qq.com/user/get_user_info

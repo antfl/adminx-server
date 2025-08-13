@@ -20,7 +20,6 @@ import java.util.Date;
 public class JwtTokenUtil {
     private final JwtConfig jwtConfig;
 
-    // 用户 ID 字段声明
     private static final String USER_ID_CLAIM = "userId";
 
     public String generateToken(String username, Long userId) {
