@@ -108,7 +108,7 @@ rate:
 
 # 接口签名配置
 signature:
-  max-time-diff: 10000 # 签名有效期 10 秒
+  max-time-diff: 5000 # 签名有效期 5 秒
   secret-key: 8D7F2A9C4E5B1F3A6C9D2E8F7B1A5C3D
 
 # QQ 登录配置

@@ -1,10 +1,7 @@
 package com.bytescheduler.adminx.config;
 
 import com.bytescheduler.adminx.common.utils.http.HttpRequestIpResolver;
-import com.bytescheduler.adminx.web.interceptor.CodeRateLimitInterceptor;
-import com.bytescheduler.adminx.web.interceptor.EmailRateLimitInterceptor;
-import com.bytescheduler.adminx.web.interceptor.RateLimitInterceptor;
-import com.bytescheduler.adminx.web.interceptor.SignatureInterceptor;
+import com.bytescheduler.adminx.web.interceptor.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,8 +19,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final RateLimitConfig rateLimitConfig;
-    private final HttpRequestIpResolver ipResolver;
     private final SignatureConfig signatureConfig;
+    private final HttpRequestIpResolver ipResolver;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -44,47 +41,45 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-
-        // 限流拦截器
+        // 复合限流拦截器
         registry.addInterceptor(
-                new RateLimitInterceptor(
-                        redisTemplate,
-                        ipResolver,
-                        rateLimitConfig
-                )
-        ).addPathPatterns("/**");
-
-        // 设备指纹拦截
-//        registry.addInterceptor(
-//                new DeviceFingerprintInterceptor(
-//                        redisTemplate,
-//                        ipResolver
-//                )
-//        ).addPathPatterns("/**");
+                new CompositeRateLimitInterceptor(redisTemplate, ipResolver, rateLimitConfig)
+        ).addPathPatterns("/**").excludePathPatterns("/auth/ip-ban-status");
 
         // 签名验证拦截器
         registry.addInterceptor(
-                new SignatureInterceptor(
-                        signatureConfig.getMaxTimeDiff(),
-                        signatureConfig.getSecretKey(),
-                        redisTemplate
-                )
-        ).addPathPatterns("/**").excludePathPatterns("/files/view/**");
+                        new SignatureInterceptor(signatureConfig.getMaxTimeDiff(), redisTemplate)
+                ).addPathPatterns("/**")
+                .excludePathPatterns("/files/view/**", "/auth/ip-ban-status");
 
-        // 邮件发送拦截器
-        registry.addInterceptor(
-                new EmailRateLimitInterceptor(
-                        redisTemplate,
-                        ipResolver
-                )
-        ).addPathPatterns("/auth/sendMailCode/**");
+        // 邮件发送限流
+        registry.addInterceptor(createDailyRateLimitInterceptor(
+                "email_limit:",
+                3,
+                "30"
+        )).addPathPatterns("/auth/sendMailCode/**");
 
-        // 验证码发送拦截器
-        registry.addInterceptor(
-                new CodeRateLimitInterceptor(
-                        redisTemplate,
-                        ipResolver
-                )
-        ).addPathPatterns("/auth/captcha");
+        // 验证码发送限流
+        registry.addInterceptor(createDailyRateLimitInterceptor(
+                "code_limit:",
+                50,
+                "32"
+        )).addPathPatterns("/auth/captcha");
+    }
+
+    private BaseRateLimitInterceptor createDailyRateLimitInterceptor(
+            String prefix,
+            int maxRequests,
+            String errorScore) {
+        return new BaseRateLimitInterceptor(
+                redisTemplate,
+                ipResolver,
+                prefix,
+                maxRequests,
+                24 * 3600,
+                "scripts/fixed_window_rate_limiter.lua",
+                "html/score.html",
+                errorScore
+        );
     }
 }
