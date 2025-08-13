@@ -73,7 +73,7 @@ public class FileServiceImpl extends ServiceImpl<FileRecordMapper, SysFileRecord
             return "";
         }
 
-        if (fileId.contains("AVATAR")) {
+        if (fileId.contains("AVATAR") || isQQAvatar(fileId)) {
             return fileId;
         }
 
@@ -162,5 +162,11 @@ public class FileServiceImpl extends ServiceImpl<FileRecordMapper, SysFileRecord
             default:
                 return "application/octet-stream";
         }
+    }
+
+    public boolean isQQAvatar(String fileId) {
+        if (fileId == null) return false;
+        return fileId.contains("/ek_qqapp/") ||
+                fileId.toLowerCase().contains("thirdqq.qlogo.cn");
     }
 }
