@@ -19,6 +19,9 @@ public class ArticleDetailResponse {
     @ApiModelProperty(value = "文章分类名称")
     private String categoryName;
 
+    @ApiModelProperty(value = "分类 ID")
+    private Long categoryId;
+
     @ApiModelProperty(value = "文章标题")
     private String title;
 

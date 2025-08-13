@@ -53,6 +53,7 @@
                u.nickname,
                u.avatar,
                c.category_name                         AS categoryName,
+               c.category_id                           AS categoryId,
                COUNT(DISTINCT i_fav.interaction_id)    AS favoriteCount,
                COUNT(DISTINCT cmt.comment_id)          AS commentCount,
                MAX(IF(il_like.type = 'like', 1, 0))    AS isLiked,
