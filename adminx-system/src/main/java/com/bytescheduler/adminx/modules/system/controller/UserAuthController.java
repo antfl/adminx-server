@@ -84,10 +84,4 @@ public class UserAuthController {
         String code = params.get("code");
         return Result.success(qqAuthService.qqLogin(code, request));
     }
-
-    @ApiOperation("获取用户 IP 状态是否异常")
-    @GetMapping("/ip-ban-status")
-    public Map<String, Object> checkIpBanStatus(HttpServletRequest request) {
-        return authService.checkIpBanStatus(request);
-    }
 }

@@ -10,7 +10,6 @@ import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.http.HttpRequestIpResolver;
 import com.bytescheduler.adminx.common.utils.security.JwtTokenUtil;
 import com.bytescheduler.adminx.common.utils.email.MailUtil;
-import com.bytescheduler.adminx.context.UserContextHolder;
 import com.bytescheduler.adminx.modules.system.dto.request.LoginRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.PasswordResetRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.RegisterRequest;
@@ -21,9 +20,9 @@ import com.bytescheduler.adminx.modules.system.entity.SysUser;
 import com.bytescheduler.adminx.modules.system.enums.UserStatus;
 import com.bytescheduler.adminx.modules.system.mapper.SysUserMapper;
 import com.bytescheduler.adminx.modules.system.service.AuthService;
+import com.bytescheduler.adminx.modules.system.utils.AuthUtil;
 import com.bytescheduler.adminx.config.CaptchaConfig;
 import com.bytescheduler.adminx.config.EmailConfig;
-import com.bytescheduler.adminx.modules.system.utils.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -47,8 +46,6 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private static final String BLACKLIST_KEY_PREFIX = "blacklist:";
-
     private final SysUserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
@@ -67,17 +64,17 @@ public class AuthServiceImpl implements AuthService {
 
         // 判断是否走邮箱验证
         if (emailConfig.isVerificationEnabled()) {
-            String rds_code = redisTemplate.opsForValue().get(captchaId);
+            String rdsCode = redisTemplate.opsForValue().get(captchaId);
             String code = params.getCode();
 
             if (emailConfig.isIgnoreCase()) {
                 // 忽略大小写比较
-                if (rds_code == null || !rds_code.equalsIgnoreCase(code)) {
+                if (rdsCode == null || !rdsCode.equalsIgnoreCase(code)) {
                     throw new BusinessException("验证码错误");
                 }
             } else {
                 // 严格区分大小写
-                if (rds_code == null || !rds_code.equals(code)) {
+                if (rdsCode == null || !rdsCode.equals(code)) {
                     throw new BusinessException("验证码错误");
                 }
             }
@@ -109,8 +106,8 @@ public class AuthServiceImpl implements AuthService {
         String captchaId = captchaConfig.getKeyHead() + params.getCaptchaId();
 
         // 获取 Redis 中验证码
-        String rds_code = redisTemplate.opsForValue().get(captchaId);
-        if (rds_code == null) {
+        String rdsCode = redisTemplate.opsForValue().get(captchaId);
+        if (rdsCode == null) {
             throw new BusinessException("验证码不存在或已过期");
         }
 
@@ -120,10 +117,10 @@ public class AuthServiceImpl implements AuthService {
             if (code != null) {
                 code = code.toLowerCase();
             }
-            rds_code = rds_code.toLowerCase();
+            rdsCode = rdsCode.toLowerCase();
         }
 
-        if (!Objects.equals(rds_code, code)) {
+        if (!Objects.equals(rdsCode, code)) {
             throw new BusinessException("验证码错误");
         }
 
@@ -267,29 +264,11 @@ public class AuthServiceImpl implements AuthService {
         return new MailCodeResponse(captchaId);
     }
 
-    @Override
-    public Map<String, Object> checkIpBanStatus(HttpServletRequest request) {
-        String IP = ipResolver.resolve(request);
-        String banKey = BLACKLIST_KEY_PREFIX + IP;
-        boolean isBanned = redisTemplate.hasKey(banKey);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("isBanned", isBanned);
-
-        if (isBanned) {
-            Long userId = UserContextHolder.get();
-            // 如果当前是登录状态，禁用当前用户
-            if (userId != null) {
-                disableUserAndClearToken(userId);
-            }
-        }
-        return response;
-    }
-
     /**
      * 禁用用户
      */
-    private void disableUserAndClearToken(Long userId) {
+    @Override
+    public void disableUserAndClearToken(Long userId) {
         LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SysUser::getUserId, userId)
                 .set(SysUser::getStatus, UserStatus.DISABLED.getCode());
@@ -299,6 +278,9 @@ public class AuthServiceImpl implements AuthService {
         authUtil.logout();
     }
 
+    /**
+     * 获取随机头像
+     */
     public static String getRandomAvatar() {
         String[] avatars = {
                 "BOY_AVATAR_A",
