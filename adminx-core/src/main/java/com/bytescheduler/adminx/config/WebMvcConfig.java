@@ -44,13 +44,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 复合限流拦截器
         registry.addInterceptor(
                 new CompositeRateLimitInterceptor(redisTemplate, ipResolver, rateLimitConfig)
-        ).addPathPatterns("/**").excludePathPatterns("/auth/ip-ban-status");
+        ).addPathPatterns("/**");
 
         // 签名验证拦截器
         registry.addInterceptor(
                         new SignatureInterceptor(signatureConfig.getMaxTimeDiff(), redisTemplate)
                 ).addPathPatterns("/**")
-                .excludePathPatterns("/files/view/**", "/auth/ip-ban-status");
+                .excludePathPatterns("/files/view/**");
 
         // 邮件发送限流
         registry.addInterceptor(createDailyRateLimitInterceptor(
@@ -62,7 +62,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 验证码发送限流
         registry.addInterceptor(createDailyRateLimitInterceptor(
                 "code_limit:",
-                50,
+                100,
                 "32"
         )).addPathPatterns("/auth/captcha");
     }

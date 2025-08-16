@@ -23,7 +23,7 @@ public class CompositeRateLimitInterceptor implements HandlerInterceptor {
     private static final String RATE_LIMIT_KEY_PREFIX = "rate_limit:";
     private static final String BLACKLIST_KEY_PREFIX = "blacklist:";
     private static final RedisScript<Boolean> RATE_LIMIT_SCRIPT =
-            ResourceLoader.loadLuaScript("scripts/fixed_window_rate_limiter", Boolean.class);
+            ResourceLoader.loadLuaScript("scripts/fixed_window_rate_limiter.lua", Boolean.class);
 
     private final RedisTemplate<String, String> redisTemplate;
     private final HttpRequestIpResolver ipResolver;
