@@ -32,6 +32,9 @@
         WHERE
         a.is_deleted = 0
         AND a.status = 1
+        <if test="params.createUserName != null and params.createUserName != ''">
+            AND u.nickname LIKE CONCAT('%', #{params.createUserName}, '%')
+        </if>
         <if test="params.title != null and params.title != ''">
             AND a.title LIKE CONCAT('%', #{params.title}, '%')
         </if>

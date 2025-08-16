@@ -18,4 +18,7 @@ public class ArticleQueryRequest extends PageParams {
 
     @ApiModelProperty(value = "文章分类")
     private Long categoryId;
+
+    @ApiModelProperty(value = "操作人")
+    private String createUserName;
 }
