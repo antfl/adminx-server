@@ -35,7 +35,7 @@ public class AuthUtil {
                 TimeUnit.MILLISECONDS
         );
 
-        return new TokenResponse(token);
+        return new TokenResponse(token, null);
     }
 
     /**
