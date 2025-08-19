@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.bytescheduler.adminx.common.exception.BusinessException;
 import com.bytescheduler.adminx.common.utils.http.HttpRequestIpResolver;
-import com.bytescheduler.adminx.common.utils.security.JwtTokenUtil;
 import com.bytescheduler.adminx.common.utils.email.MailUtil;
 import com.bytescheduler.adminx.modules.system.dto.request.LoginRequest;
 import com.bytescheduler.adminx.modules.system.dto.request.PasswordResetRequest;
@@ -36,7 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author byte-scheduler
@@ -48,7 +46,6 @@ public class AuthServiceImpl implements AuthService {
 
     private final SysUserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenUtil jwtTokenUtil;
     private final RedisTemplate<String, String> redisTemplate;
     private final CaptchaConfig captchaConfig;
     private final EmailConfig emailConfig;
@@ -155,17 +152,7 @@ public class AuthServiceImpl implements AuthService {
         updateWrapper.set(SysUser::getLastLoginTime, LocalDateTime.now());
         userMapper.update(null, updateWrapper);
 
-        String userId = user.getUserId().toString();
-        String token = jwtTokenUtil.generateToken(userId, user.getUserId());
-
-        redisTemplate.opsForValue().set(
-                userId,
-                token,
-                jwtTokenUtil.getExpirationFromToken(token),
-                TimeUnit.MILLISECONDS
-        );
-
-        return new TokenResponse(token);
+        return authUtil.generateToken(user);
     }
 
     @Override
@@ -199,6 +186,7 @@ public class AuthServiceImpl implements AuthService {
         // 重置密码
         updateWrapper.set(StringUtils.isNotBlank(newPassword), SysUser::getPassword, newPassword);
         userMapper.update(null, updateWrapper);
+
         // 清除当前 TOKEN
         redisTemplate.delete(sysUser.getUserId() + "");
         redisTemplate.delete(captchaId);

@@ -167,6 +167,7 @@ public class FileServiceImpl extends ServiceImpl<FileRecordMapper, SysFileRecord
     public boolean isQQAvatar(String fileId) {
         if (fileId == null) return false;
         return fileId.contains("/ek_qqapp/") ||
-                fileId.toLowerCase().contains("thirdqq.qlogo.cn");
+                fileId.toLowerCase().contains("thirdqq.qlogo.cn") ||
+                fileId.toLowerCase().contains("githubusercontent");
     }
 }
