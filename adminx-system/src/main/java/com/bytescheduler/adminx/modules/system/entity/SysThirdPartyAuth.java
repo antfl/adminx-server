@@ -3,7 +3,10 @@ package com.bytescheduler.adminx.modules.system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +16,9 @@ import java.time.LocalDateTime;
  * @author byte-scheduler
  * @since 2025/8/17
  */
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Data
 @TableName("sys_third_party_auth")
 public class SysThirdPartyAuth {

@@ -3,14 +3,12 @@ package com.bytescheduler.adminx.modules.system.controller;
 import com.bytescheduler.adminx.annotation.Log;
 import com.bytescheduler.adminx.common.entity.Result;
 import com.bytescheduler.adminx.enums.OperationType;
-import com.bytescheduler.adminx.modules.system.dto.request.LoginRequest;
-import com.bytescheduler.adminx.modules.system.dto.request.PasswordResetRequest;
-import com.bytescheduler.adminx.modules.system.dto.request.RegisterRequest;
+import com.bytescheduler.adminx.modules.system.dto.request.*;
 import com.bytescheduler.adminx.modules.system.dto.response.CaptchaResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.MailCodeResponse;
 import com.bytescheduler.adminx.modules.system.dto.response.TokenResponse;
-import com.bytescheduler.adminx.modules.system.service.AuthService;
-import com.bytescheduler.adminx.modules.system.service.QQAuthService;
+import com.bytescheduler.adminx.modules.system.service.*;
+import com.bytescheduler.adminx.modules.system.strategy.UnifiedThirdPartyLoginService;
 import com.bytescheduler.adminx.modules.system.utils.AuthUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -31,7 +28,8 @@ public class UserAuthController {
 
     private final AuthUtil authUtil;
     private final AuthService authService;
-    private final QQAuthService qqAuthService;
+    private final ThirdPartyAuthService thirdPartyAuthService;
+    private final UnifiedThirdPartyLoginService unifiedLoginService;
 
     @ApiOperation("用户注册")
     @Log(module = "用户注册", type = OperationType.USER_REGISTER, value = "用户注册")
@@ -78,10 +76,19 @@ public class UserAuthController {
         return Result.success(authService.generateMailCode(mail, type));
     }
 
-    @ApiOperation("QQ 登录")
-    @PostMapping("/qq")
-    public Result<TokenResponse> qqLogin(@RequestBody Map<String, String> params, HttpServletRequest request) {
-        String code = params.get("code");
-        return Result.success(qqAuthService.qqLogin(code, request));
+    @ApiOperation("三方账号登录")
+    @PostMapping("/third-party")
+    public Result<TokenResponse> thirdPartyLogin(@RequestBody BindingRequest params) {
+        TokenResponse response = unifiedLoginService.handleLogin(
+                params.getProvider(),
+                params.getAuthCode()
+        );
+        return Result.success(response);
+    }
+
+    @ApiOperation("根据三方账号创建用户")
+    @PostMapping("/createUser")
+    public Result<TokenResponse> createUser(@RequestBody CreateUser params, HttpServletRequest request) {
+        return Result.success(thirdPartyAuthService.createUser(params, request));
     }
 }

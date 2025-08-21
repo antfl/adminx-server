@@ -34,12 +34,6 @@ public class QQUserInfoResponse {
     /**
      * QQ 头像
      */
-    @JsonProperty("figureurl_qq_2")
-    private String qqAvatar100;
-
-    /**
-     * QQ 头像
-     */
     @JsonProperty("figureurl_qq")
     private String qqAvatar;
 }

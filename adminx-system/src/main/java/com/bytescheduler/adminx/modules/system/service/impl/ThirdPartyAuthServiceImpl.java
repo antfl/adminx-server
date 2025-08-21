@@ -52,62 +52,95 @@ public class ThirdPartyAuthServiceImpl extends ServiceImpl<SysThirdPartyAuthMapp
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void bindAccount(BindingRequest params) {
-        Long userId = UserContextHolder.get();
-        SysThirdPartyAuth thirdPartyAuth = authMapper.selectOne(
-                new LambdaUpdateWrapper<SysThirdPartyAuth>()
-                        .eq(SysThirdPartyAuth::getProvider, params.getProvider())
+        final Long userId = UserContextHolder.get();
+        final String provider = params.getProvider();
+
+        // 检查当前用户是否已绑定该平台账号
+        checkUserBinding(userId, provider);
+
+        // 根据不同的第三方平台处理绑定逻辑
+        if (ThirdPartyProvider.GITHUB.is(provider)) {
+            bindGithubAccount(userId, params.getAuthCode());
+        } else if (ThirdPartyProvider.QQ.is(provider)) {
+            bindQQAccount(userId, params.getAuthCode());
+        } else {
+            throw new BusinessException("不支持的第三方登录类型");
+        }
+    }
+
+    /**
+     * 判断当前三方账号是否被绑定
+     */
+    private void checkUserBinding(Long userId, String provider) {
+        boolean exists = authMapper.exists(
+                new LambdaQueryWrapper<SysThirdPartyAuth>()
                         .eq(SysThirdPartyAuth::getUserId, userId)
+                        .eq(SysThirdPartyAuth::getProvider, provider)
         );
-
-        if (thirdPartyAuth != null) {
-            throw new BusinessException("该账号已被绑定");
+        if (exists) {
+            throw new BusinessException("该平台账号已被绑定");
         }
+    }
 
-        if (params.getProvider().equals(ThirdPartyProvider.GITHUB.getProvider())) {
-            String accessToken = githubAuthService.getAccessToken(params.getAuthCode());
-            GithubUserInfo userInfo = githubAuthService.getUserInfo(accessToken);
+    /**
+     * 绑定 GitHub 账号
+     */
+    private void bindGithubAccount(Long userId, String authCode) {
+        String accessToken = githubAuthService.getAccessToken(authCode);
+        GithubUserInfo userInfo = githubAuthService.getUserInfo(accessToken);
 
-            SysThirdPartyAuth partyAuth = authMapper.selectOne(
-                    new LambdaQueryWrapper<SysThirdPartyAuth>()
-                            .eq(SysThirdPartyAuth::getOpenId, userInfo.getId())
-            );
-            if (partyAuth != null) {
-                throw new BusinessException("该账号已被绑定");
-            }
+        checkOpenIdBinding(userInfo.getId());
+        createThirdPartyAuth(userId,
+                ThirdPartyProvider.GITHUB.getProvider(),
+                userInfo.getId(),
+                userInfo.getAvatarUrl(),
+                userInfo.getName());
+    }
 
-            SysThirdPartyAuth sysThirdPartyAuth = new SysThirdPartyAuth();
-            sysThirdPartyAuth.setOpenId(userInfo.getId());
-            sysThirdPartyAuth.setProvider(ThirdPartyProvider.GITHUB.getProvider());
-            sysThirdPartyAuth.setBindTime(LocalDateTime.now());
-            sysThirdPartyAuth.setAvatarUrl(userInfo.getAvatarUrl());
-            sysThirdPartyAuth.setNickname(userInfo.getName());
-            sysThirdPartyAuth.setUserId(userId);
-            baseMapper.insert(sysThirdPartyAuth);
-            return;
+    /**
+     * 绑定 QQ 账号
+     */
+    private void bindQQAccount(Long userId, String authCode) {
+        String accessToken = qqAuthService.getAccessToken(authCode);
+        String openid = qqAuthService.getOpenid(accessToken);
+        QQUserInfoResponse userInfo = qqAuthService.getUserInfo(accessToken, openid);
+
+        checkOpenIdBinding(userInfo.getOpenId());
+        createThirdPartyAuth(userId,
+                ThirdPartyProvider.QQ.getProvider(),
+                userInfo.getOpenId(),
+                userInfo.getQqAvatar(),
+                userInfo.getNickname());
+    }
+
+    private void checkOpenIdBinding(String openId) {
+        boolean exists = authMapper.exists(
+                new LambdaQueryWrapper<SysThirdPartyAuth>()
+                        .eq(SysThirdPartyAuth::getOpenId, openId)
+        );
+        if (exists) {
+            throw new BusinessException("该第三方账号已被其他用户绑定");
         }
+    }
 
-        if (params.getProvider().equals(ThirdPartyProvider.QQ.getProvider())) {
-            String accessToken = qqAuthService.getAccessToken(params.getAuthCode());
-            String openid = qqAuthService.getOpenid(accessToken);
-            QQUserInfoResponse userInfo = qqAuthService.getUserInfo(accessToken, openid);
+    /**
+     * 创建用户绑定的三方账号
+     */
+    private void createThirdPartyAuth(Long userId,
+                                      String provider,
+                                      String openId,
+                                      String avatarUrl,
+                                      String nickname) {
+        SysThirdPartyAuth auth = SysThirdPartyAuth.builder()
+                .userId(userId)
+                .provider(provider)
+                .openId(openId)
+                .avatarUrl(avatarUrl)
+                .nickname(nickname)
+                .bindTime(LocalDateTime.now())
+                .build();
 
-            SysThirdPartyAuth partyAuth = authMapper.selectOne(
-                    new LambdaQueryWrapper<SysThirdPartyAuth>()
-                            .eq(SysThirdPartyAuth::getOpenId, userInfo.getOpenId())
-            );
-            if (partyAuth != null) {
-                throw new BusinessException("该账号已被绑定");
-            }
-
-            SysThirdPartyAuth sysThirdPartyAuth = new SysThirdPartyAuth();
-            sysThirdPartyAuth.setOpenId(userInfo.getOpenId());
-            sysThirdPartyAuth.setProvider(ThirdPartyProvider.QQ.getProvider());
-            sysThirdPartyAuth.setBindTime(LocalDateTime.now());
-            sysThirdPartyAuth.setAvatarUrl(userInfo.getQqAvatar());
-            sysThirdPartyAuth.setNickname(userInfo.getNickname());
-            sysThirdPartyAuth.setUserId(userId);
-            baseMapper.insert(sysThirdPartyAuth);
-        }
+        baseMapper.insert(auth);
     }
 
     @Override

@@ -22,4 +22,8 @@ public enum ThirdPartyProvider {
         this.provider = provider;
         this.description = description;
     }
+
+    public boolean is(String provider) {
+        return this.provider.equals(provider);
+    }
 }
