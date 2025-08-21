@@ -119,3 +119,12 @@ qq:
   access-token-url: https://graph.qq.com/oauth2.0/token
   openid-url: https://graph.qq.com/oauth2.0/me
   user-info-url: https://graph.qq.com/user/get_user_info
+
+# github 登录配置
+github:
+  client-id: Ov23lihR664NL115OifZ
+  client-secret:
+  redirect-uri: https://byteout.cn/login
+  authorization-uri: https://github.com/login/oauth/authorize
+  token-uri: https://github.com/login/oauth/access_token
+  user-info-uri: https://api.github.com/user
