@@ -64,7 +64,7 @@ mybatis-plus:
 
 # JWT 配置（需与 JwtTokenUtil 中的字段对应）
 jwt:
-  secret: 256-bit-secret-1234567890abcdefghijklmnopqrstuvwxyz
+  secret: eFq2P9cR7wLbYd5sK8zJxV3mHtN6gU1A0Qr4oMlI7yTpXkC5nBvZ
   expiration: 604800 # 过期时间（秒）
   token-header: Authorization
   token-prefix: "Bearer "
