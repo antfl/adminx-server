@@ -73,7 +73,7 @@ public class FileServiceImpl extends ServiceImpl<FileRecordMapper, SysFileRecord
             return "";
         }
 
-        if (fileId.contains("AVATAR") || isQQAvatar(fileId)) {
+        if (fileId.contains("AVATAR") || isThirdAvatar(fileId)) {
             return fileId;
         }
 
@@ -164,10 +164,13 @@ public class FileServiceImpl extends ServiceImpl<FileRecordMapper, SysFileRecord
         }
     }
 
-    public boolean isQQAvatar(String fileId) {
-        if (fileId == null) return false;
-        return fileId.contains("/ek_qqapp/") ||
-                fileId.toLowerCase().contains("thirdqq.qlogo.cn") ||
-                fileId.toLowerCase().contains("githubusercontent");
+    /**
+     * 三方账号头像判断
+     */
+    public boolean isThirdAvatar(String url) {
+        if (url == null) return false;
+        return url.contains("/ek_qqapp/") ||
+                url.toLowerCase().contains("thirdqq.qlogo.cn") ||
+                url.toLowerCase().contains("githubusercontent");
     }
 }
