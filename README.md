@@ -13,8 +13,8 @@ https://adminx.byteout.cn
 
 ### 贡献者
 
-<a href="https://github.com/antfl/adminx-web/graphs/contributors" target="_blank">
-  <img src="https://contrib.rocks/image?repo=antfl/adminx-web&columns=12" alt="">
+<a href="https://github.com/antfl/adminx-server/graphs/contributors" target="_blank">
+  <img src="https://contrib.rocks/image?repo=antfl/adminx-server&columns=12" alt="">
 </a>
 
 ### Javadoc 标签
