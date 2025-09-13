@@ -1,11 +1,13 @@
-# admin-x-server
+# Admin x
 
->一个全场景企业级后台管理模板，集成表单、富文本、可视化图表（ECharts）、拖拽布局、动态表格联动等核心功能，采用模块化设计支持快速扩展，适用于中后台系统开发与前端技术栈实践。技术栈：Spring Boot + Redis + MySQL
+> 一个全场景企业级后台管理模板，集成表单、富文本、可视化图表（ECharts）、拖拽布局、动态表格联动等核心功能，采用模块化设计支持快速扩展，适用于中后台系统开发与前端技术栈实践。技术栈：Spring Boot + Redis + MySQL
 
-# 演示地址
-https://byteout.cn
+## 演示地址
 
-> 点击链接加入群聊【Admin x 大暑版】：https://qm.qq.com/q/KCSI9GMiE8
+https://adminx.byteout.cn
+
+## 交流与反馈
+[加入 Byteout 技术交流群](https://qm.qq.com/q/KCSI9GMiE8)
 
 - Javadoc 标签
 
