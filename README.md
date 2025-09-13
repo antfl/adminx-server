@@ -9,6 +9,8 @@ https://adminx.byteout.cn
 ## 交流与反馈
 [加入 Byteout 技术交流群](https://qm.qq.com/q/KCSI9GMiE8)
 
+![dashboard.png](docs/dashboard.png)
+
 - Javadoc 标签
 
 | 标签            | 用途      | 示例                                 |
@@ -27,4 +29,3 @@ https://adminx.byteout.cn
 # build
 mvn clean package -Dmaven.test.skip=true
 ```
-![dashboard.png](docs/dashboard.png)
