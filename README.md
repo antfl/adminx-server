@@ -6,16 +6,22 @@
 
 https://adminx.byteout.cn
 
+![dashboard.png](docs/dashboard.png)
+
 ## 交流与反馈
 [加入 Byteout 技术交流群](https://qm.qq.com/q/KCSI9GMiE8)
 
-![dashboard.png](docs/dashboard.png)
+### 贡献者
 
-- Javadoc 标签
+<a href="https://github.com/antfl/adminx-web/graphs/contributors" target="_blank">
+  <img src="https://contrib.rocks/image?repo=antfl/adminx-web&columns=12" alt="">
+</a>
+
+### Javadoc 标签
 
 | 标签            | 用途      | 示例                                 |
 |---------------|---------|------------------------------------|
-| `@author`     | 作者信息    | `@author byte-scheduler`           |
+| `@author`     | 作者信息    | `@author antfl`                    |
 | `@since`      | 创建时间/版本 | `@since 2025/5/14`                 |
 | `@see`        | 相关参考	   | `@see UserLoginRequest`            |
 | `@deprecated` | 标记废弃	   | `@deprecated 请使用新版`                |
