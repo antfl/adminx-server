@@ -17,7 +17,7 @@ spring:
     allow-circular-references: true
     allow-bean-definition-overriding: true
   application:
-    name: admin-x
+    name: adminx
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/admin_x?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
@@ -84,7 +84,7 @@ knife4j:
 logging:
   level:
     root: info
-    com.bytescheduler.adminx: debug  # 项目包日志级别
+    cn.byteout.adminx: debug  # 项目包日志级别
     org.springframework.security: debug
   file:
     name: logs/app.log

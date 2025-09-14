@@ -12,7 +12,7 @@
     </parent>
 
     <!-- 项目基础信息 -->
-    <groupId>com.bytescheduler</groupId>
+    <groupId>cn.byteout</groupId>
     <artifactId>adminx-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -49,22 +49,22 @@
         <dependencies>
             <!-- 模块依赖 -->
             <dependency>
-                <groupId>com.bytescheduler</groupId>
+                <groupId>cn.byteout</groupId>
                 <artifactId>adminx-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.bytescheduler</groupId>
+                <groupId>cn.byteout</groupId>
                 <artifactId>adminx-gateway</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.bytescheduler</groupId>
+                <groupId>cn.byteout</groupId>
                 <artifactId>adminx-scheduler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.bytescheduler</groupId>
+                <groupId>cn.byteout</groupId>
                 <artifactId>adminx-system</artifactId>
                 <version>${project.version}</version>
             </dependency>

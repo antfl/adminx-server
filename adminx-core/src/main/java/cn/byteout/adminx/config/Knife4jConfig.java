@@ -25,7 +25,7 @@ public class Knife4jConfig {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.bytescheduler.adminx"))
+                .apis(RequestHandlerSelectors.basePackage("cn.byteout.adminx"))
                 .paths(PathSelectors.any())
                 .build()
                 .enableUrlTemplating(true);
