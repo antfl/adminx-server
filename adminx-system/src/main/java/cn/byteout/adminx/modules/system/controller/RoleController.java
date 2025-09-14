@@ -1,0 +1,105 @@
+package cn.byteout.adminx.modules.system.controller;
+
+import cn.byteout.adminx.annotation.Log;
+import cn.byteout.adminx.common.entity.PageResult;
+import cn.byteout.adminx.common.entity.Result;
+import cn.byteout.adminx.enums.OperationType;
+import cn.byteout.adminx.modules.system.dto.request.RoleMenuRequest;
+import cn.byteout.adminx.modules.system.dto.request.RolePermissionsRequest;
+import cn.byteout.adminx.modules.system.dto.request.RoleQueryRequest;
+import cn.byteout.adminx.modules.system.dto.request.RoleRequest;
+import cn.byteout.adminx.modules.system.entity.SysRole;
+import cn.byteout.adminx.modules.system.service.RoleMenuService;
+import cn.byteout.adminx.modules.system.service.RoleService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.Arrays;
+
+/**
+ * @author antfl
+ * @since 2025/6/8
+ */
+@Api(tags = "角色管理")
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/role")
+public class RoleController {
+
+    private final RoleService roleService;
+    private final RoleMenuService roleMenuService;
+
+    @ApiOperation("角色分页查询")
+    @Log(module = "角色管理", type = OperationType.SELECT, value = "角色分页查询")
+    @GetMapping("/page")
+    public Result<PageResult<SysRole>> pageRole(@Valid RoleQueryRequest params) {
+        return roleService.pageQuery(params);
+    }
+
+    @ApiOperation("角色详情")
+    @GetMapping("/{roleId}")
+    @Log(module = "角色管理", type = OperationType.SELECT, value = "角色详情")
+    public Result<SysRole> getRole(@PathVariable Long roleId) {
+        SysRole role = roleService.getById(roleId);
+        if (role == null || role.getIsDeleted() == 1) {
+            return Result.failed("角色不存在");
+        }
+        return Result.success(role);
+    }
+
+    @ApiOperation("创建角色")
+    @Log(module = "角色管理", type = OperationType.INSERT, value = "创建角色")
+    @PostMapping
+    public Result<String> createRole(@Valid @RequestBody RoleRequest params) {
+        roleService.createRole(params);
+        return Result.success("创建成功");
+    }
+
+    @ApiOperation("更新角色")
+    @Log(module = "角色管理", type = OperationType.UPDATE, value = "更新角色")
+    @PutMapping("/{roleId}")
+    public Result<String> updateRole(@PathVariable Long roleId, @Valid @RequestBody RoleRequest params) {
+        roleService.updateRole(roleId, params);
+        return Result.success("更新成功");
+    }
+
+    @ApiOperation("删除角色")
+    @Log(module = "角色管理", type = OperationType.DELETE, value = "删除角色")
+    @DeleteMapping("/del/{roleId}")
+    public Result<String> deleteRole(@PathVariable Long roleId) {
+        roleService.removeById(roleId);
+        return Result.success("删除成功");
+    }
+
+    @ApiOperation("修改角色状态")
+    @Log(module = "角色管理", type = OperationType.UPDATE, value = "修改角色状态")
+    @PatchMapping("/{roleId}/status")
+    public Result<String> updateStatus(@PathVariable Long roleId, @RequestParam Integer status) {
+        if (!Arrays.asList(0, 1).contains(status)) {
+            return Result.failed("状态值无效");
+        }
+
+        SysRole role = new SysRole();
+        role.setRoleId(roleId);
+        role.setStatus(status);
+        roleService.updateById(role);
+        return Result.success("状态更新成功");
+    }
+
+    @ApiOperation("获取角色权限")
+    @Log(module = "角色管理", type = OperationType.SELECT, value = "获取角色权限")
+    @GetMapping("/permission/{roleId}")
+    public Result<RolePermissionsRequest> getRolePermissions(@PathVariable Long roleId) {
+        return roleService.getRolePermissions(roleId);
+    }
+
+    @ApiOperation("编辑角色菜单权限")
+    @Log(module = "角色管理", type = OperationType.UPDATE, value = "编辑角色菜单权限")
+    @PostMapping("/setRoleMenus")
+    public Result<String> setRoleMenus(@Valid @RequestBody RoleMenuRequest dto) {
+        return roleMenuService.setRoleMenus(dto);
+    }
+}

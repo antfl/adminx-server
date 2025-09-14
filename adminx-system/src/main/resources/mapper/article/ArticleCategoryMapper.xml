@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bytescheduler.adminx.modules.article.mapper.ArticleCategoryMapper">
+<mapper namespace="cn.byteout.adminx.modules.article.mapper.ArticleCategoryMapper">
 
-    <select id="selectCategoryPage" resultType="com.bytescheduler.adminx.modules.article.dto.response.CategoryResponse">
+    <select id="selectCategoryPage" resultType="cn.byteout.adminx.modules.article.dto.response.CategoryResponse">
         SELECT
         ac.category_id as categoryId,
         ac.category_name AS categoryName,

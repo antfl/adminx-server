@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bytescheduler.adminx.modules.system.mapper.SysUserMapper">
-    <select id="selectByUsername" resultType="com.bytescheduler.adminx.modules.system.entity.SysUser">
+<mapper namespace="cn.byteout.adminx.modules.system.mapper.SysUserMapper">
+    <select id="selectByUsername" resultType="cn.byteout.adminx.modules.system.entity.SysUser">
         SELECT *
         FROM sys_user
         WHERE username = #{username}
@@ -10,7 +10,7 @@
     </select>
 
     <!-- 最近 7 天新增用户 -->
-    <select id="selectRecentUsers" resultType="com.bytescheduler.adminx.modules.system.dto.response.RecentUserResponse">
+    <select id="selectRecentUsers" resultType="cn.byteout.adminx.modules.system.dto.response.RecentUserResponse">
         SELECT nickname, avatar
         FROM sys_user
         WHERE create_time >= #{startTime}
@@ -18,7 +18,7 @@
     </select>
 
     <!-- 活跃用户统计 -->
-    <select id="selectActiveUsers" resultType="com.bytescheduler.adminx.modules.system.dto.response.ActiveUserResponse">
+    <select id="selectActiveUsers" resultType="cn.byteout.adminx.modules.system.dto.response.ActiveUserResponse">
         SELECT
             u.nickname,
             u.avatar,

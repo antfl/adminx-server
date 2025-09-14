@@ -13,7 +13,7 @@
 
     <!-- 项目基础信息 -->
     <groupId>com.bytescheduler</groupId>
-    <artifactId>admin-x-server</artifactId>
+    <artifactId>adminx-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Admin x Parent</name>
@@ -23,7 +23,6 @@
     <modules>
         <module>adminx-core</module>
         <module>adminx-system</module>
-        <module>adminx-scheduler</module>
         <module>adminx-web</module>
     </modules>
 

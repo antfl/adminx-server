@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bytescheduler.adminx.modules.article.mapper.ArticleMapper">
+<mapper namespace="cn.byteout.adminx.modules.article.mapper.ArticleMapper">
 
-    <select id="pageQueryArticle" resultType="com.bytescheduler.adminx.modules.article.dto.response.ArticlePageResponse">
+    <select id="pageQueryArticle" resultType="cn.byteout.adminx.modules.article.dto.response.ArticlePageResponse">
         SELECT
         a.article_id AS articleId,
         a.title,
@@ -45,7 +45,7 @@
         ORDER BY a.create_time DESC
     </select>
 
-    <select id="selectArticleDetailById" resultType="com.bytescheduler.adminx.modules.article.dto.response.ArticleDetailResponse">
+    <select id="selectArticleDetailById" resultType="cn.byteout.adminx.modules.article.dto.response.ArticleDetailResponse">
         SELECT a.article_id                            AS articleId,
                a.title,
                a.content,
